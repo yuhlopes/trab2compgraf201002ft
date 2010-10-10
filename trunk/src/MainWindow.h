@@ -11,12 +11,12 @@ class MainWindow : public QMainWindow
 public slots:
     void update(void);
     void clicou(QAction* a);
-    void abriu(const QString &s);
 
 public:
     MainWindow();
     
 private:
+   CommandQueue *fila;
    RenderPanel* centralpanel;
    QFileDialog *fd;
    QAction *open;

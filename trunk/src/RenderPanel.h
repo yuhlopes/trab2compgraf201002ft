@@ -9,18 +9,21 @@ class RenderPanel : public QWidget
     Q_OBJECT
 
 private slots:
-    void update(void);
+    void update(const QImage &);
+    void recebeArquivo(const QString &);
 
 signals:
     void atualizaMain(void);
-    void sendNewPainter(QPainter *p);
+    void atualizaTamanho(int , int);
+    void enviaArquivo(const QString &);
 
 public:
     RenderPanel(CommandQueue *c);
 
 private:
 
-    QImage* buffer;
+    int screenW;
+    int screenH;
     QLabel* fundolb;
     CommandQueue *cmdq;
     

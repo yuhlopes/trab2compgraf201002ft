@@ -1,6 +1,15 @@
 #include <CommandQueue.h>
 #include <QMutexLocker>
-
+/*
+ExCom & operator=(ExCom &e, const ExCom &d)
+{
+    e.cmd = d.cmd;
+    e.x = d.x;
+    e.y = d.y;
+    
+    return e;
+}
+*/
 CommandQueue::CommandQueue()
 {
     indPro = 0;
@@ -10,7 +19,7 @@ CommandQueue::CommandQueue()
     cmdList[0].y = 0;
 }
 
-void CommandQueue::produz(Commands cmd, int x, int y)
+void CommandQueue::produz(Commands cmd, int x = 0, int y = 0)
 {
      QMutexLocker locker(&m);
      
@@ -27,9 +36,8 @@ void CommandQueue::produz(Commands cmd, int x, int y)
 
 ExCom CommandQueue::consome()
 {
-    ExCom cmd;
     QMutexLocker locker(&m);
-    
+    ExCom cmd;
     cmd.cmd = cmdList[indCon].cmd;
     cmd.x = cmdList[indCon].x;
     cmd.x = cmdList[indCon].x;
