@@ -64,8 +64,12 @@ void Interface::addFace(QVector<QPoint> in)
     ant->setProx(first);
 
     int n = in.size();
+/*
     map[qMakePair(in[n-1], in[n])] = ant;
     twin = findTwin(in[n],in[n-1]);
+*/
+    map[qMakePair(in[n-1],in[0])] = ant;
+    twin = findTwin(in[0],in[n-1]);
     ant->setTwin(twin);
     if (twin!= NULL)
         twin->setTwin(ant);
