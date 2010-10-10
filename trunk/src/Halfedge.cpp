@@ -1,4 +1,4 @@
-#include "HalfEdge.h"
+#include "halfEdge.h"
 
 HalfEdge::HalfEdge()
 {
