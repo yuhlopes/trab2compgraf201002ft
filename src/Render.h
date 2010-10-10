@@ -7,31 +7,59 @@
 #include <QPainter>
 #include <QDebug>
 #include <CommandQueue.h>
+//#include <Interface.h>
 
-class Render : public /*QObject*/QThread
+#define INCPOS      10
+#define INCZ        0.2
+#define ZOOMLIMIT   5.0
+#define MARGEM      0.05
+
+class Render : public QThread
 {
 	Q_OBJECT
 
 signals:
-        void renderizado(/*const QPixmap *px*/);
+        void renderizado(const QImage &screen);
+
         
 public slots:
-    void updatePainter(QPainter* p);
+    void updateScreen(int w, int y);
+    void recebeArquivo(const QString &);
+
                 
 public:
-	Render(QPainter * p, CommandQueue *c);
-//public slots:
+        Render(int w, int y, CommandQueue *c);
+
     void run(void);
 
 private:
-	//QPixmap *qp;
-        //QTimer *tm;
-        QPainter* painter;
-        int i,j;
-        int r,g,b;
-        CommandQueue *cmdq;
-        
+        void atualizaScreen(void);
+        void incX();
+        void decX();
+        void incY();
+        void decY();
+        void incZoom();
+        void decZoom();
+        QPoint transforma(const QPoint &);
+        QPoint destransforma(const QPoint &);
+        void renderiza(void);
 
+	    
+        QImage* screen;
+        QImage* buffer;
+        QImage* backBuffer;
+        double zoom;
+        CommandQueue *cmdq;
+        QPoint *ponto;
+        QPoint *sel;
+        int screenW;
+        int screenH;
+        bool mostraPonto;
+        bool mostraAresta;
+        bool mostraFace;
+        //Interface interface;
+        QMap<QPoint , QPoint> map;
+        
 };
 
 #endif

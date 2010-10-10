@@ -14,7 +14,17 @@
 #include <QMutex>
 
 enum Commands{
-    NENHUM
+    NENHUM,
+    INCZOOM,
+    DECZOOM,
+    INCX,
+    DECX,
+    INCY,
+    DECY,
+    PONTOS,
+    ARESTAS,
+    FACES,
+    SELECT
 };
 
 typedef struct _ExCom{

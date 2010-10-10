@@ -3,24 +3,31 @@
 RenderPanel::RenderPanel(CommandQueue *c)
 {  
     cmdq = c;
-    buffer = new QImage(750,550, QImage::Format_RGB32);
     fundolb = new QLabel(this);
     
-    Render *r = new Render(new QPainter(buffer), c);
-    connect(r, SIGNAL(renderizado()), this, SLOT(update()), Qt::QueuedConnection);
-    connect(this, SIGNAL(sendNewPainter(QPainter *)), r, SLOT(updatePainter(QPainter* )), Qt::QueuedConnection);
+    screenW = 750;
+    screenH = 550;
+
+    Render *r = new Render(screenW, screenW, c);
+    connect(r, SIGNAL(renderizado(const QImage &)), this, SLOT(update(const QImage &)), Qt::QueuedConnection);
+    connect(this, SIGNAL(atualizaTamanho(int, int)), r, SLOT(updateScreen(int, int)), Qt::QueuedConnection);
+    connect(this, SIGNAL(enviaArquivo(const QString &)), r, SLOT(recebeArquivo(const QString &)), Qt::QueuedConnection);
     
-    fundolb->setPixmap(QPixmap::fromImage(*buffer));
     fundolb->show();
     
     repaint();
     r->start();
 }
 
-void RenderPanel::update(void)
+void RenderPanel::update(const QImage& screen)
 {
-    fundolb->setPixmap(QPixmap::fromImage(*buffer));
+    fundolb->setPixmap(QPixmap::fromImage(screen));
     fundolb->show();
     repaint();
     emit atualizaMain();
+}
+
+void RenderPanel::recebeArquivo(const QString &filename)
+{
+    emit enviaArquivo(filename);
 }

@@ -2,7 +2,6 @@
 #include <QPainter>
 #include <Qt>
 #include <CommandQueue.h>
-#include <PlyParser.h>
 
 MainWindow::MainWindow()
 {
@@ -14,7 +13,7 @@ MainWindow::MainWindow()
     
     
     connect(tb, SIGNAL(actionTriggered( QAction * )), this, SLOT(clicou(QAction*)));
-    connect(fd, SIGNAL(fileSelected(const QString &)), this, SLOT(abriu(const QString &)));
+    connect(fd, SIGNAL(fileSelected(const QString &)), centralpanel, SLOT(recebeArquivo(const QString &)));
     
     
     open = tb->addAction("T1");
@@ -28,21 +27,6 @@ MainWindow::MainWindow()
 
     setWindowTitle("trab2FT 0.0.1");
     setFixedSize(800, 600);
-}
-
-void MainWindow::abriu(const QString &s)
-{
-    QVector<QPoint> tmp;
-    PlyParser ps(s);
-    tmp = ps.proximo();
-    int i =0;
-    while(tmp.size() > 0)
-    {
-        
-        qDebug() << i++ << ":" << tmp;
-        tmp = ps.proximo();
-    }
-    qDebug() << "FIM!";
 }
 
 void MainWindow::clicou(QAction* a)
