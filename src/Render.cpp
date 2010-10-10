@@ -2,12 +2,6 @@
 #include <QPaintDevice>
 #include <PlyParser.h>
 
-bool operator<(const QPoint &v, const QPoint &u)
-{
-    if(v.x() == u.x())
-        return v.y() < u.y();
-    return v.x() < u.x();
-}
 
 Render::Render(int w, int h, CommandQueue *c) {
 
@@ -71,7 +65,7 @@ void Render::run(void) {
                 if(sel != NULL)
                     delete sel;
                 sel = new QPoint(ex.x,ex.y);
-                //renderiza
+                renderiza();
                 break;
         }
         atualizaScreen();
@@ -90,7 +84,7 @@ void Render::updateScreen(int w, int h)
            delete backBuffer;
            buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
            backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-           //renderiza
+           renderiza();
     }
 
     if(ponto->x() + w > buffer->width())
@@ -110,11 +104,16 @@ void Render::recebeArquivo(const QString &filename)
     tmp = ply.proximo();
     while(tmp.size() > 0)
     {
-        //interface.addFace(tmp);
+        qDebug() << tmp;
+        interface.addFace(tmp);
+        qDebug() << "Passou";
         tmp = ply.proximo();
     }
-    //interface.finaliza();
-    //renderiza;
+    qDebug() << "Saiu";
+    //interface.addExtEdges();
+    qDebug() << "Completou";
+    renderiza();
+    qDebug() << "Renderizou";
     
     atualizaScreen();
  }
@@ -157,7 +156,7 @@ void Render::incZoom()
     delete backBuffer;
     buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
     backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    //renderiza
+    renderiza();
 }
 void Render::decZoom()
 {
@@ -170,7 +169,7 @@ void Render::decZoom()
     delete backBuffer;
     buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
     backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    //renderiza
+    renderiza();
 }
 
 QPoint Render::transforma(const QPoint &in)
@@ -184,16 +183,16 @@ QPoint Render::transforma(const QPoint &in)
     xmax = buffer->width() - xmin;
     ymax = buffer->height() - ymin;
 
-    //xwmin = interface.getMinX();
+    xwmin = interface.getMinX();
     if(xwmin > xmin)
         xwmin = xmin;
-    //xwmax = interface.getMaxX();
+    xwmax = interface.getMaxX();
     if(xwmax < xmax)
         xwmax = xmax;
-    //ywmin = interface.getMinY();
+    ywmin = interface.getMinY();
     if(ywmin > ymin)
         ywmin = ymin;
-    //ywmax = interface.getMaxY();
+    ywmax = interface.getMaxY();
     if(ywmax < ymax)
         ywmax = ymax;
 
@@ -220,21 +219,23 @@ QPoint Render::destransforma(const QPoint &in)
 
 void Render::renderiza(void)
 {
-    QMap<QPoint, QPoint> m;
     QPoint p1, p2;
 
-    QMap<QPoint,QPoint>::Iterator i;
+    QList<QPair<QPoint,QPoint> > lista = interface.getArestas();
     QPainter painter(buffer);
     QPen pen;
-    QColor cor(255,255,255,0);
+    QColor cor(255,255,255,255);
     pen.setColor(cor);
 
     painter.fillRect(0,0,buffer->width(), buffer->height(),cor);
 
-    for(i = m.begin(); i != m.end(); ++i)
+    qDebug() <<  "Tamanho Buffer: " << buffer->width() << " x " << buffer->height();
+    for(int i = 0; i < lista.size() ; ++i)
     {
-        p1 = transforma(i.key());
-        p2 = transforma(i.value());
+        qDebug() << lista[i];
+        p1 = transforma(lista[i].first);
+        p2 = transforma(lista[i].second);
+        qDebug() << "Transformado: " << p1 << " - " << p2;
         painter.drawLine(p1,p2);
     }
 }

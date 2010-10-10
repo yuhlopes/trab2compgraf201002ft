@@ -1,9 +1,5 @@
 #include "Interface.h"
-
-#define EXTERNA NULL
-#define INF 0x3F3F3F3F
-#define MIN(a,b) ((a < b)?(a):(b))
-#define MAX(a,b) ((a > b)?(a):(b))
+#include <QDebug>
 
 Interface::Interface()
 {
@@ -13,12 +9,18 @@ Interface::Interface()
     maxY = -INF;
 }
 
-bool operator<(const QPoint &p1, const QPoint &p2)
+inline bool operator< (const QPoint& p1, const QPoint& p2)
 {
-    if (p1.x() == p2.x())
+ if (p1.x() == p2.x())
         return (p1.y() < p2.y());
 
     return (p1.x() < p2.x());
+
+}
+
+QList<QPair<QPoint, QPoint> > Interface::getArestas()
+{
+    return map.keys();
 }
 
 void Interface::addFace(QVector<QPoint> in)
@@ -48,7 +50,7 @@ void Interface::addFace(QVector<QPoint> in)
         if (ant!= NULL)
         {
             ant->setProx(e);
-
+            qDebug() << in[i-1] << "-" << in[i];
             map[qMakePair(in[i-1], in[i])] = ant;
 
             twin = findTwin(in[i],in[i-1]);
@@ -59,15 +61,14 @@ void Interface::addFace(QVector<QPoint> in)
 
         ant = e;
     }
+    qDebug() << "Saiu do for";
 
     first->setAnt(ant);
     ant->setProx(first);
 
     int n = in.size();
-/*
-    map[qMakePair(in[n-1], in[n])] = ant;
-    twin = findTwin(in[n],in[n-1]);
-*/
+
+    qDebug() << "Fora do for:" << in[n-1] << "-" << in[0];
     map[qMakePair(in[n-1],in[0])] = ant;
     twin = findTwin(in[0],in[n-1]);
     ant->setTwin(twin);
