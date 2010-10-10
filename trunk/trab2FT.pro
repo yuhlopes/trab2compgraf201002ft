@@ -63,6 +63,8 @@ HEADERS += src/MainWindow.h
 HEADERS += src/RenderPanel.h
 HEADERS += src/Render.h
 HEADERS += src/CommandQueue.h
+HEADERS += src/PlyParser.h
+
 
 
 # Arquivos .cpp
@@ -71,6 +73,8 @@ SOURCES += src/MainWindow.cpp
 SOURCES += src/RenderPanel.cpp
 SOURCES += src/Render.cpp
 SOURCES += src/CommandQueue.cpp
+SOURCES += src/PlyParser.cpp
+
 
 # Arquivos .ui (QTDesigner)
 #FORMS += src/meuform.ui
