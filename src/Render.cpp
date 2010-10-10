@@ -18,7 +18,7 @@ void Render::run(void) {
         if (i + 25 >= (painter->device()->width())) {
             //qDebug() << "Fim de linha";
             if (j + 25 >= (painter->device()->height())) {
-                qDebug() << "Fim de Pagina";
+                //qDebug() << "Fim de Pagina";
                 pagina = true;
                 emit renderizado();
                 //sai = true;
