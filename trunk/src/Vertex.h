@@ -18,7 +18,6 @@ void setEdge(HalfEdge *hEdge);
 void setPoint(QPoint p);
 QPoint getPoint(void) const;
 
-
 private:
     QPoint p;
     HalfEdge *hEdge;

@@ -7,7 +7,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <CommandQueue.h>
-//#include <Interface.h>
+#include <Interface.h>
 
 #define INCPOS      10
 #define INCZ        0.2
@@ -57,7 +57,7 @@ private:
         bool mostraPonto;
         bool mostraAresta;
         bool mostraFace;
-        //Interface interface;
+        Interface interface;
         QMap<QPoint , QPoint> map;
         
 };

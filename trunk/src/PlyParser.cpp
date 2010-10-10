@@ -61,7 +61,7 @@ PlyParser::PlyParser(const QString& filename)
 		         }else 
 		            qDebug() << "Deu Ruim [2]!:#" << word << "#";
 		         estado = 3;
-		         qDebug() << "word:" << word;
+                         //qDebug() << "word:" << word;
 		         break;
 		        
 		     case 2:
@@ -123,8 +123,8 @@ PlyParser::PlyParser(const QString& filename)
 	}
 	
 	indice = 0;
-//	qDebug() << "NVertices: " << nVertices;
-//	qDebug() << "NFaces: " << nFaces;	
+//        qDebug() << "NVertices: " << nVertices;
+//        qDebug() << "NFaces: " << nFaces;
 }
 
 QVector<QPoint> PlyParser::proximo()

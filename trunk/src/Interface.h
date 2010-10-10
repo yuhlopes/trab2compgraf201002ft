@@ -7,6 +7,11 @@
 #include "HalfEdge.h"
 #include "Face.h"
 
+#define EXTERNA NULL
+#define INF 0x3F3F3F3F
+#define MIN(a,b) ((a < b)?(a):(b))
+#define MAX(a,b) ((a > b)?(a):(b))
+
 class Interface : public QObject
 {
     Q_OBJECT
@@ -16,10 +21,11 @@ public:
 HalfEdge* findTwin(QPoint u,QPoint v);
 void addFace(QVector<QPoint> in);
 void addExtEdges(void);
-int getMaxX(void);
-int getMaxY(void);
-int getMinX(void);
-int getMinY(void);
+int getMaxX(void){ return maxX; }
+int getMaxY(void){ return maxY; }
+int getMinX(void){ return minX; }
+int getMinY(void){ return minY; }
+QList<QPair<QPoint, QPoint> > getArestas();
 
 private:
     QMap<QPoint,Vertex*> vertices;
@@ -30,5 +36,6 @@ private:
     Vertex* addVertex(QPoint p);
 };
 
+inline bool operator< (const QPoint& p1, const QPoint& p2);
 
 #endif // INTERFACE_H
