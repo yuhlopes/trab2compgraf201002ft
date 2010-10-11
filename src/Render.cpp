@@ -33,7 +33,7 @@ void Render::run(void) {
         {
             case NENHUM:
                 msleep(100);
-                break;
+                continue;
             case INCZOOM:
                 incZoom();
                 break;
@@ -162,6 +162,9 @@ void Render::incZoom()
 }
 void Render::decZoom()
 {
+    int w = screenW;
+    int h = screenH;
+
     if(zoom - INCZ > 1.0)
         zoom -= INCZ;
     else
@@ -171,6 +174,13 @@ void Render::decZoom()
     delete backBuffer;
     buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
     backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
+
+
+    if(ponto->x() + w > buffer->width())
+        ponto->setX(buffer->width() - w);
+    if(ponto->y() + h > buffer->height())
+        ponto->setY(buffer->height() - h);
+
     renderiza();
 }
 
@@ -190,15 +200,18 @@ QPoint Render::transforma(const QPoint &in)
     ywmin = interface.getMinY();
     ywmax = interface.getMaxY();
 
-    sx = (xmax - xmin)/(xwmax - xwmin);
-    sy = (ymax - ymin)/(ywmax - ywmin);
+    sx = (xmax - xmin + 0.0)/(xwmax - xwmin + 0.0);
+    sy = (ymax - ymin + 0.0)/(ywmax - ywmin + 0.0);
 
     if(sx < sy)
         sy = sx;
-    else if(sx > sy)
+    else
         sx = sy;
 
-    QPoint p(sx*(in.x() - xwmin) + xmin, sy*(in.y() - ywmin) + ymin);
+    int x = sx*in.x() - sx*xwmin + xmin + 0.5;
+    int y = sy*in.y() - sy*ywmin + ymin + 0.5;
+
+    QPoint p(x, y);
     map[p] = in;
     return p;
 }
