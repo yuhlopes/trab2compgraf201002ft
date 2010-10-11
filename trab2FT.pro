@@ -78,3 +78,6 @@ SOURCES += src/MainWindow.cpp
 SOURCES += src/RenderPanel.cpp
 SOURCES += src/Render.cpp
 SOURCES += src/CommandQueue.cpp
+
+# Arquivos dos resources (imagens por exemplo) do jogo
+RESOURCES += trab2FT.qrc

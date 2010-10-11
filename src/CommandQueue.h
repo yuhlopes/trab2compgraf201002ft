@@ -40,7 +40,7 @@ public:
     CommandQueue();
     
     ExCom consome();
-    void produz(Commands, int, int);
+    void produz(Commands cmd, int x = 0, int y = 0);
 
 private:
     ExCom cmdList[MAXCOMMANDS];

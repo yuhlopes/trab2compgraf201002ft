@@ -9,8 +9,8 @@
 #include <CommandQueue.h>
 #include <Interface.h>
 
-#define INCPOS      10
-#define INCZ        0.2
+#define INCPOS      20
+#define INCZ        0.4
 #define ZOOMLIMIT   5.0
 #define MARGEM      0.05
 
