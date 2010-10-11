@@ -19,8 +19,15 @@ private:
    CommandQueue *fila;
    RenderPanel* centralpanel;
    QFileDialog *fd;
-   QAction *open;
    QToolBar * tb;
+   QAction *open;
+   QAction *zoomIn;
+   QAction *zoomOut;
+   QAction *panR;
+   QAction *panL;
+   QAction *panU;
+   QAction *panD;
+
 
 };
 

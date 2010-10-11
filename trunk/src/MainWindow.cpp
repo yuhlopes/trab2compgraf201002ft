@@ -5,7 +5,16 @@
 
 MainWindow::MainWindow()
 {
-    centralpanel = new RenderPanel(new CommandQueue());
+    QIcon zi(":zoom-in");
+    QIcon zo(":zoom-out");
+    QIcon op(":open");
+    QIcon al(":arrow-left");
+    QIcon au(":arrow-up");
+    QIcon ar(":arrow-rigth");
+    QIcon ad(":arrow-down");
+
+    fila = new CommandQueue();
+    centralpanel = new RenderPanel(fila);
     setCentralWidget(centralpanel);
 
     tb = new QToolBar("Tool Bar Teste", this);
@@ -16,10 +25,15 @@ MainWindow::MainWindow()
     connect(fd, SIGNAL(fileSelected(const QString &)), centralpanel, SLOT(recebeArquivo(const QString &)));
     
     
-    open = tb->addAction("T1");
-    tb->addAction("T2");
+    open = tb->addAction(op,"");
     tb->addSeparator();
-    tb->addAction("T3");
+    zoomIn = tb->addAction(zi, "");
+    zoomOut = tb->addAction(zo, "");
+    tb->addSeparator();
+    panU = tb->addAction(au, "");
+    panL = tb->addAction(al, "");
+    panR = tb->addAction(ar, "");
+    panD = tb->addAction(ad, "");
 
     addToolBar(Qt::LeftToolBarArea, tb);
 
@@ -31,7 +45,29 @@ MainWindow::MainWindow()
 
 void MainWindow::clicou(QAction* a)
 {
-    if(a == open) fd->open();
+    if(a == open)
+        fd->open();
+    else if(a == zoomIn)
+    {
+        qDebug() << "Antes";
+        fila->produz(INCZOOM);
+        qDebug() << "Depois";
+    }else if (a == zoomOut)
+    {
+        fila->produz(DECZOOM);
+    }else if (a == panU)
+    {
+        fila->produz(DECY);
+    }else if (a == panL)
+    {
+        fila->produz(DECX);
+    }else if (a == panD)
+    {
+        fila->produz(INCY);
+    }else if(a == panR)
+    {
+        fila->produz(INCX);
+    }
 }
 
 void MainWindow::update(void)

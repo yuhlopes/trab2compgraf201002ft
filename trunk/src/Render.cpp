@@ -154,8 +154,10 @@ void Render::incZoom()
 
     delete buffer;
     delete backBuffer;
+    qDebug() << "Deletou";
     buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
     backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
+    qDebug() << "Criou";
     renderiza();
 }
 void Render::decZoom()
@@ -184,17 +186,9 @@ QPoint Render::transforma(const QPoint &in)
     ymax = buffer->height() - ymin;
 
     xwmin = interface.getMinX();
-    if(xwmin > xmin)
-        xwmin = xmin;
     xwmax = interface.getMaxX();
-    if(xwmax < xmax)
-        xwmax = xmax;
     ywmin = interface.getMinY();
-    if(ywmin > ymin)
-        ywmin = ymin;
     ywmax = interface.getMaxY();
-    if(ywmax < ymax)
-        ywmax = ymax;
 
     sx = (xmax - xmin)/(xwmax - xwmin);
     sy = (ymax - ymin)/(ywmax - ywmin);
@@ -220,12 +214,12 @@ QPoint Render::destransforma(const QPoint &in)
 void Render::renderiza(void)
 {
     QPoint p1, p2;
-
     QList<QPair<QPoint,QPoint> > lista = interface.getArestas();
     QPainter painter(buffer);
     QPen pen;
     QColor cor(255,255,255,255);
     pen.setColor(cor);
+    map.clear();
 
     painter.fillRect(0,0,buffer->width(), buffer->height(),cor);
 
