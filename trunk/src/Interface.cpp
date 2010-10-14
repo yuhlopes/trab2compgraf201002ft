@@ -7,6 +7,7 @@ Interface::Interface()
     minY = INF;
     maxX = -INF;
     maxY = -INF;
+    faceExterna = NULL;
 }
 
 inline bool operator< (const QPoint& p1, const QPoint& p2)
@@ -110,10 +111,61 @@ HalfEdge* Interface::findTwin(QPoint u, QPoint v)
     return NULL;
 }
 
+void Interface::adicionaface(HalfEdge* e, Face* f)
+{
+    HalfEdge *ori = e;
+    HalfEdge *ant = NULL;
+    HalfEdge *nova = NULL;
+
+    nova = new HalfEdge();
+
+    nova->setFace(f);
+    nova->setTwin(ori);
+    ori->setTwin(nova);
+    ori = ori->getProx();
+    nova->setOrigem(ori->getOrigem());
+    f->setOuterComp(nova);
+    ant = nova;
+
+    while(ori != e)
+    {
+        while(ori->getTwin() != NULL)
+            ori = ori->getTwin()->getProx();
+
+        nova = new HalfEdge();
+
+        nova->setFace(f);
+        nova->setTwin(ori);
+        ori->setTwin(nova);
+        ori = ori->getProx();
+        nova->setProx(ant);
+        ant->setAnt(nova);
+        nova->setOrigem(ori->getOrigem());
+    }
+
+    ant->setAnt(ori->getTwin());
+    ori->getTwin()->setProx(ant);
+}
+
 void Interface::addExtEdges(void)
 {
-    Face *ext = new Face();
+    if(faceExterna == NULL)
+        faceExterna = new Face();
 
+    QList<HalfEdge *> lista = map.values();
+
+
+    for(int i = 0; i < lista.size(); ++i)
+    {
+        if(lista[i]->getTwin() == NULL)
+        {
+            adicionaface(lista[i], faceExterna);
+        }
+    }
+
+    //faces.push_back(faceExterna);
+
+/*
     for (int i = 0; i < faces.size(); i++)
     {
         HalfEdge *e1 = faces[i]->getOuterComp();
@@ -152,4 +204,5 @@ void Interface::addExtEdges(void)
     }
 
     faces.push_back(ext);
+    */
 }

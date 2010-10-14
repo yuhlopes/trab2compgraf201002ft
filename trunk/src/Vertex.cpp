@@ -9,12 +9,12 @@ Vertex::Vertex(QPoint p)
     this->p = p;
 }
 
-bool operator== (const Vertex &v1, const Vertex &v2)
+bool Vertex::operator== ( const Vertex &v2)const
 {
-    return (v1.getPoint() == v2.getPoint());
+    return (this->getPoint() == v2.getPoint());
 }
 
-bool Vertex::operator <(Vertex *v)
+bool Vertex::operator <(Vertex *v)const
 {
     if (this->getPoint().x() == v->getPoint().x())
         return (this->getPoint().y() - v->getPoint().y());

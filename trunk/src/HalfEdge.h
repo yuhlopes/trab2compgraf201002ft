@@ -24,6 +24,32 @@ Face*     getFace(void);
 HalfEdge* getTwin(void);
 HalfEdge* getProx(void);
 HalfEdge* getAnt(void);
+bool operator==(HalfEdge& );
+
+ class Iterator
+    {
+    private:
+        HalfEdge* primeira;
+
+    public:
+        Iterator(Iterator* i);
+        Iterator(HalfEdge *atual);
+        Iterator();
+         Iterator& operator++(int i);
+         Iterator& operator++();
+         HalfEdge* operator->();
+         Iterator& operator=(const Iterator& i);
+         bool operator==(const Iterator& i)const;
+         bool operator!=(const Iterator& i)const;
+         HalfEdge& operator*()const;
+
+         HalfEdge* atual;
+
+    };
+
+    typedef HalfEdge::Iterator iterator;
+    iterator begin();
+    iterator end();
 
 private:
     Vertex *origem;

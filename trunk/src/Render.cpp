@@ -12,10 +12,20 @@ Render::Render(int w, int h, CommandQueue *c) {
     sel = NULL;
     
     screen = new QImage(w,h,QImage::Format_RGB32);
-    zoom = 1.0;
-    buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
+    //zoom = 1.0;
+    //buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
+    //backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
     ponto = new QPoint(0,0);
+    arestaScreen.setColor(QColor(0,0,0,255));
+    selecionadoScreen.setColor(QColor(0,128,128,255));
+    //faceSelecionadaScreen;
+    faceExternaBack.setColor(QColor(255,0,0,255));
+    arestaGrossaBack.setColor(QColor(255,255,0,255));
+    arestaGrossaBack.setWidth(10);
+    verticeGrossoBack.setColor(QColor(0,255,0,255));
+    verticeGrossoBack.setWidth(10);
+    arestafinaBack.setColor(QColor(0,0,255,255));
+    verticefinoBack.setColor(QColor(0,255,255,255));
 }
 
 void Render::run(void) {
@@ -98,7 +108,22 @@ void Render::updateScreen(int w, int h)
 void Render::recebeArquivo(const QString &filename)
 {
     QVector<QPoint> tmp;
-    
+
+    sel = NULL;
+
+    zoom = 1.0;
+    ponto->setX(0);
+    ponto->setY(0);
+    if(buffer != NULL)
+    {
+        delete buffer;
+        delete backBuffer;
+    }
+    buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
+    backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
+
+    //interface.clear();
+
     PlyParser ply(filename);
     
     tmp = ply.proximo();
@@ -110,7 +135,7 @@ void Render::recebeArquivo(const QString &filename)
         tmp = ply.proximo();
     }
     qDebug() << "Saiu";
-    //interface.addExtEdges();
+    interface.addExtEdges();
     qDebug() << "Completou";
     renderiza();
     qDebug() << "Renderizou";
@@ -132,8 +157,11 @@ void Render::incX()
 }
 void Render::decX()
 {
-    if(ponto->x() - INCPOS > 0)
+    if(ponto->x() - INCPOS >= 0)
         ponto->setX(ponto->x() - INCPOS);
+    else
+        ponto->setX(0);
+
 }
 void Render::incY()
 {
@@ -142,11 +170,16 @@ void Render::incY()
 }
 void Render::decY()
 {
-    if(ponto->y() - INCPOS > 0)
+    if(ponto->y() - INCPOS >= 0)
         ponto->setY(ponto->y() - INCPOS);
+    else
+        ponto->setY(0);
 }
 void Render::incZoom()
 {
+    if(zoom == ZOOMLIMIT)
+        return;
+
     if(zoom + INCZ < ZOOMLIMIT)
         zoom += INCZ;
     else
@@ -164,6 +197,9 @@ void Render::decZoom()
 {
     int w = screenW;
     int h = screenH;
+
+    if(zoom == 1.0)
+        return;
 
     if(zoom - INCZ > 1.0)
         zoom -= INCZ;
@@ -218,8 +254,9 @@ QPoint Render::transforma(const QPoint &in)
 QPoint Render::destransforma(const QPoint &in)
 {
     QPoint p;
-    if(map.find(in) != map.end())
-        return map[in];
+    QMap<QPoint, QPoint>::Iterator it = map.find(in);
+    if(it != map.end())
+        return it.value();
     else
         return p;
 }
@@ -228,21 +265,41 @@ void Render::renderiza(void)
 {
     QPoint p1, p2;
     QList<QPair<QPoint,QPoint> > lista = interface.getArestas();
-    QPainter painter(buffer);
-    QPen pen;
-    QColor cor(255,255,255,255);
-    pen.setColor(cor);
+    QColor branco(255,255,255,255);
+    QPainter buff(buffer);
+    QPainter back(backBuffer);
+    QBrush b(branco);
+
+    buff.fillRect(0,0,buffer->width(), buffer->height(),branco);
+    back.fillRect(0,0,buffer->width(), buffer->height(),branco);
+
+    buff.setPen(arestaScreen);
+
     map.clear();
-
-    painter.fillRect(0,0,buffer->width(), buffer->height(),cor);
-
-    qDebug() <<  "Tamanho Buffer: " << buffer->width() << " x " << buffer->height();
     for(int i = 0; i < lista.size() ; ++i)
     {
-        qDebug() << lista[i];
         p1 = transforma(lista[i].first);
         p2 = transforma(lista[i].second);
-        qDebug() << "Transformado: " << p1 << " - " << p2;
-        painter.drawLine(p1,p2);
+
+        buff.drawLine(p1,p2);
+
+        back.setPen(arestaGrossaBack);
+        back.drawLine(p1,p2);
+        back.setPen(verticeGrossoBack);
+        back.drawEllipse(p1,5,5);
+        back.drawEllipse(p2,5,5);
+
+    }
+    for(int i = 0; i < lista.size() ; ++i)
+    {
+        //qDebug() << lista[i];
+        p1 = transforma(lista[i].first);
+        p2 = transforma(lista[i].second);
+
+        back.setPen(arestafinaBack);
+        back.drawLine(p1,p2);
+        back.setPen(verticefinoBack);
+        back.drawPoint(p1);
+        back.drawPoint(p2);
     }
 }
