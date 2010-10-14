@@ -19,7 +19,7 @@ inline bool operator< (const QPoint& p1, const QPoint& p2)
 
 }
 
-QList<QPair<QPoint, QPoint> > Interface::getArestas()
+QList<QPair<QPoint, QPoint> > Interface::getTodasArestas()
 {
     return map.keys();
 }
@@ -205,4 +205,63 @@ void Interface::addExtEdges(void)
 
     faces.push_back(ext);
     */
+}
+
+QList<QPair<QPoint, QPoint> > Interface::getArestasNearAresta(HalfEdge* h)
+{
+    QList<QPair<QPoint, QPoint> > lista;
+    return lista;
+}
+QList<QPair<QPoint, QPoint> > Interface::getArestasNearFace(Face* f)
+{
+    QList<QPair<QPoint, QPoint> > lista;
+    return lista;
+}
+QList<QPair<QPoint, QPoint> > Interface::getArestasNearVertice(Vertex* v)
+{
+    QList<QPair<QPoint, QPoint> > lista;
+    return lista;
+}
+QList<QPoint> Interface::getVerticesNearAresta(HalfEdge* h)
+{
+    QList<QPoint> lista;
+    return lista;
+}
+QList<QPoint> Interface::getVerticesNearFace(Face* f)
+{
+    QList<QPoint> lista;
+    return lista;
+}
+QList<QPoint> Interface::getVerticesNearVertice(Vertex* v)
+{
+    QList<QPoint> lista;
+    return lista;
+}
+QList<QList<QPoint> > Interface::getFacesNearAresta(HalfEdge* h)
+{
+    QList<QList<QPoint> > lista;
+    return lista;
+}
+QList<QList<QPoint> > Interface::getFacesNearFace(Face* f)
+{
+    QList<QList<QPoint> > lista;
+    return lista;
+}
+QList<QList<QPoint> > Interface::getFacesNearVertice(Vertex* v)
+{
+    QList<QList<QPoint> > lista;
+    return lista;
+}
+
+HalfEdge* Interface::getArestaNear(QPoint p)
+{
+    return NULL;
+}
+Face* Interface::getFaceNear(QPoint p)
+{
+    return NULL;
+}
+Vertex* Interface::getVerticeNear(QPoint p)
+{
+    return NULL;
 }

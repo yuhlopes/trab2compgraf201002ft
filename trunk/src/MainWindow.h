@@ -27,6 +27,9 @@ private:
    QAction *panL;
    QAction *panU;
    QAction *panD;
+   QAction *vertice;
+   QAction *aresta;
+   QAction *face;
 
 
 };
