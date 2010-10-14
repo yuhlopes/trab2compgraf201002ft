@@ -12,6 +12,9 @@ private slots:
     void update(const QImage &);
     void recebeArquivo(const QString &);
 
+protected:
+    void mouseReleaseEvent(QMouseEvent *event);
+
 signals:
     void atualizaMain(void);
     void atualizaTamanho(int , int);

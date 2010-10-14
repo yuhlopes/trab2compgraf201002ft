@@ -37,3 +37,9 @@ void RenderPanel::recebeArquivo(const QString &filename)
 {
     emit enviaArquivo(filename);
 }
+
+void RenderPanel::mouseReleaseEvent(QMouseEvent *event)
+{
+    qDebug() << "mouseReleaseEvent: x=" << event->x() << ", y=" << event->y();
+    cmdq->produz(SELECT,event->x(), event->y());
+}
