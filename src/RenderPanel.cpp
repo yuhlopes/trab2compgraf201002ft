@@ -14,6 +14,8 @@ RenderPanel::RenderPanel(CommandQueue *c)
     connect(this, SIGNAL(enviaArquivo(const QString &)), r, SLOT(recebeArquivo(const QString &)), Qt::QueuedConnection);
     
     QImage tmp(screenW, screenH,QImage::Format_RGB32);
+    QPainter p(&tmp);
+    p.fillRect(tmp.rect(),QColor(255,255,255,255));
     fundolb->setPixmap(QPixmap::fromImage(tmp));
     fundolb->show();
 

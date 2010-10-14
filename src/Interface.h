@@ -26,6 +26,7 @@ int getMaxY(void){ return maxY; }
 int getMinX(void){ return minX; }
 int getMinY(void){ return minY; }
 QList<QPair<QPoint, QPoint> > getArestas();
+Face *faceExterna;
 
 private:
     QMap<QPoint,Vertex*> vertices;
@@ -34,6 +35,7 @@ private:
     int minX, minY, maxX, maxY;
 
     Vertex* addVertex(QPoint p);
+    void adicionaface(HalfEdge* e, Face* f);
 };
 
 inline bool operator< (const QPoint& p1, const QPoint& p2);

@@ -123,6 +123,7 @@ PlyParser::PlyParser(const QString& filename)
 	}
 	
 	indice = 0;
+        file.close();
 //        qDebug() << "NVertices: " << nVertices;
 //        qDebug() << "NFaces: " << nFaces;
 }

@@ -9,9 +9,9 @@
 #include <CommandQueue.h>
 #include <Interface.h>
 
-#define INCPOS      20
-#define INCZ        0.4
-#define ZOOMLIMIT   5.0
+#define INCPOS      100
+#define INCZ        0.5
+#define ZOOMLIMIT   10.0
 #define MARGEM      0.05
 
 class Render : public QThread
@@ -48,6 +48,7 @@ private:
         QImage* screen;
         QImage* buffer;
         QImage* backBuffer;
+        QImage* frontBuffer;
         double zoom;
         CommandQueue *cmdq;
         QPoint *ponto;
@@ -59,6 +60,17 @@ private:
         bool mostraFace;
         Interface interface;
         QMap<QPoint , QPoint> map;
+        QPen arestaScreen;
+        QPen selecionadoScreen;
+        //QPen faceSelecionadaScreen;
+        QPen faceExternaBack;
+        QPen arestaGrossaBack;
+        QPen verticeGrossoBack;
+        QPen arestafinaBack;
+        QPen verticefinoBack;
+
+
+
         
 };
 

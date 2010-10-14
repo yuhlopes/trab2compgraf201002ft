@@ -13,14 +13,16 @@ public:
     Vertex();
     Vertex(QPoint p);
 
-bool operator< (Vertex *v);
-void setEdge(HalfEdge *hEdge);
-void setPoint(QPoint p);
-QPoint getPoint(void) const;
+    bool operator==( const Vertex &v2)const;
+    bool operator< (Vertex *v)const;
+    void setEdge(HalfEdge *hEdge);
+    void setPoint(QPoint p);
+    QPoint getPoint(void) const;
 
-private:
+   private:
     QPoint p;
     HalfEdge *hEdge;
+
 };
 
 #endif // VERTEX_H
