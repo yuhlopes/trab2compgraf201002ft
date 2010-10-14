@@ -43,13 +43,11 @@ private:
         QPoint transforma(const QPoint &);
         QPoint destransforma(const QPoint &);
         void renderiza(void);
-        void seleciona(void);
-        QPoint buscaPontoFino(QPoint ent);
-        QPair<QPoint, QPoint> buscaPontoGrosso(QPoint ent);
-        QPair<QPair<QPoint, QPoint> , QPair<QPoint, QPoint> > buscaArestaFina(QPoint ent);
-        QPair<QPoint, QPoint> buscaArestaGrossa();
+        void renderizaFaces(QList<QList<QPoint> > lista);
+        void renderizaArestas(QList<QPair<QPoint,QPoint> > lista);
+        void renderizaVertices(QList<QPoint> lista);
+        void selecionados(void);
 
-	    
         QImage* screen;
         QImage* buffer;
         QImage* backBuffer;
@@ -68,22 +66,14 @@ private:
         QPen arestaScreen;
         QPen selecionadoScreen;
         //QPen faceSelecionadaScreen;
-        QRgb corArestaFina;
         QRgb corArestaGrossa;
-        QRgb corVerticeFino;
         QRgb corVerticeGrosso;
         QRgb corFace;
         QRgb corFaceExt;
 
         QPen faceExternaBack;
         QPen arestaGrossaBack;
-        QPen verticeGrossoBack;
-        QPen arestafinaBack;
-        QPen verticefinoBack;
-
-
-
-        
+        QPen verticeGrossoBack;        
 };
 
 #endif

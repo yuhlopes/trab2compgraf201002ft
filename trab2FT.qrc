@@ -7,5 +7,8 @@
         <file alias="arrow-down" >imgs/arrow-down.png</file>
         <file alias="arrow-left" >imgs/arrow-left.png</file>
         <file alias="arrow-rigth" >imgs/arrow-rigth.png</file>
+        <file alias="vertice" >imgs/vertice.png</file>
+        <file alias="aresta" >imgs/aresta.png</file>
+        <file alias="face" >imgs/face.png</file>
     </qresource>
 </RCC>
