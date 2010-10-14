@@ -1,6 +1,7 @@
 #include <Render.h>
 #include <QPaintDevice>
 #include <PlyParser.h>
+#include <QRgb>
 
 
 Render::Render(int w, int h, CommandQueue *c) {
@@ -16,27 +17,36 @@ Render::Render(int w, int h, CommandQueue *c) {
     //buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
     //backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
     ponto = new QPoint(0,0);
+
+    corArestaFina = qRgb(0,0,255);
+    corArestaGrossa = qRgb(255,255,0);
+    corVerticeFino = qRgb(0, 255,255);
+    corVerticeGrosso = qRgb(0,255,0);
+    corFace = qRgb(255,255,255);
+    corFaceExt = qRgb(0,0,0);
+
+
     arestaScreen.setColor(QColor(0,0,0,255));
     selecionadoScreen.setColor(QColor(0,128,128,255));
     //faceSelecionadaScreen;
-    faceExternaBack.setColor(QColor(255,0,0,255));
-    arestaGrossaBack.setColor(QColor(255,255,0,255));
+    faceExternaBack.setColor(corFaceExt);
+    arestaGrossaBack.setColor(corArestaGrossa);
+    verticeGrossoBack.setColor(corVerticeGrosso);
+    arestafinaBack.setColor(corArestaFina);
+    verticefinoBack.setColor(corVerticeFino);
     arestaGrossaBack.setWidth(10);
-    verticeGrossoBack.setColor(QColor(0,255,0,255));
     verticeGrossoBack.setWidth(10);
-    arestafinaBack.setColor(QColor(0,0,255,255));
-    verticefinoBack.setColor(QColor(0,255,255,255));
 }
 
 void Render::run(void) {
     ExCom ex;
     
     do {
-        if(!mostraPonto && !mostraAresta && !mostraFace)
-        {
-            if(sel != NULL)
-                    delete sel;
-        }
+        //if(!mostraPonto && !mostraAresta && !mostraFace)
+        //{
+        //    if(sel != NULL)
+        //            delete sel;
+        //}
 
         ex = cmdq->consome();
         switch(ex.cmd)
@@ -75,7 +85,7 @@ void Render::run(void) {
                 if(sel != NULL)
                     delete sel;
                 sel = new QPoint(ex.x,ex.y);
-                renderiza();
+                seleciona();
                 break;
         }
         atualizaScreen();
@@ -146,7 +156,7 @@ void Render::recebeArquivo(const QString &filename)
 void Render::atualizaScreen(void)
 {
     delete screen;
-    screen = new QImage((buffer->copy(ponto->x(), ponto->y(),screenW,screenH)));
+    screen = new QImage((backBuffer->copy(ponto->x(), ponto->y(),screenW,screenH)));
     emit renderizado(*screen);
 }
 
@@ -285,21 +295,132 @@ void Render::renderiza(void)
 
         back.setPen(arestaGrossaBack);
         back.drawLine(p1,p2);
+        back.setPen(arestafinaBack);
+        back.drawLine(p1,p2);
         back.setPen(verticeGrossoBack);
         back.drawEllipse(p1,5,5);
         back.drawEllipse(p2,5,5);
-
-    }
-    for(int i = 0; i < lista.size() ; ++i)
-    {
-        //qDebug() << lista[i];
-        p1 = transforma(lista[i].first);
-        p2 = transforma(lista[i].second);
-
-        back.setPen(arestafinaBack);
-        back.drawLine(p1,p2);
         back.setPen(verticefinoBack);
         back.drawPoint(p1);
         back.drawPoint(p2);
+
     }
+    //for(int i = 0; i < lista.size() ; ++i)
+    //{
+    //    //qDebug() << lista[i];
+    //    p1 = transforma(lista[i].first);
+    //    p2 = transforma(lista[i].second);
+
+    //
+    //    back.setPen(verticefinoBack);
+    //    back.drawPoint(p1);
+    //    back.drawPoint(p2);
+    // }
+}
+
+void Render::seleciona(void)
+{
+    qDebug() << "selciona: x=" << sel->x() << ", y=" << sel->y();
+    sel->setX(sel->x() + ponto->x());
+    sel->setY(sel->y() + ponto->y());
+
+    QRgb rgb = backBuffer->pixel(*sel);
+
+    if(rgb == corVerticeFino)
+    {
+        qDebug() << "Clicou Ponto Fino";
+    }else if(rgb == corVerticeGrosso)
+    {
+        qDebug() << "Clicou Ponto Grosso";
+        QPoint fonte = buscaPontoFino(*sel);
+        qDebug() << "Fonte: " << fonte;
+    }else if(rgb == corArestaFina)
+    {
+        qDebug() << "Clicou aresta Fina";
+    }
+    else if(rgb == corArestaGrossa)
+    {
+        qDebug() << "Clicou aresta grossa";
+    }else if(rgb == corFace)
+    {
+        qDebug() << "Clicou Face";
+    }else if(rgb == corFaceExt)
+    {
+        qDebug() << "Clicou Face Externa";
+    }
+
+    //int r = qRed(rgb);
+    //int g = qGreen(rgb);
+    //int b = qBlue(rgb);
+
+    //arestafinaBack.
+}
+
+QPoint Render::buscaPontoFino(QPoint ent)
+{
+    QRgb cor;
+    QPoint ret;
+
+    int incx = 1;
+    int i = ent.x();
+    int j = ent.y();
+    while(true)
+    {
+        cor = backBuffer->pixel(i,j);
+        if(cor == corVerticeFino)
+        {
+            ret.setX(i);
+            ret.setY(j);
+            return ret;
+        }else if(cor != corVerticeGrosso)
+        {
+            j++;
+            incx=-incx;
+            i+=incx;
+            cor = backBuffer->pixel(i,j);
+            if(cor != corVerticeGrosso)
+            {
+                break;
+            }
+         }else
+             i+= incx;
+     }
+
+
+    incx = -1;
+    i = ent.x()-1;
+    j = ent.y();
+    while(true)
+    {
+        cor = backBuffer->pixel(i,j);
+        if(cor == corVerticeFino)
+        {
+            ret.setX(i);
+            ret.setY(j);
+            return ret;
+        }else if(cor != corVerticeGrosso)
+        {
+            j--;
+            incx=-incx;
+            i+=incx;
+            cor = backBuffer->pixel(i,j);
+            if(cor != corVerticeGrosso)
+            {
+                break;
+            }
+         }else
+             i+= incx;
+     }
+    qDebug() << "FUUUU!";
+
+    return ret;
+}
+QPair<QPoint, QPoint> Render::buscaPontoGrosso(QPoint ent)
+{
+}
+QPair<QPair<QPoint, QPoint> , QPair<QPoint, QPoint> > Render::buscaArestaFina(QPoint ent)
+{
+}
+QPair<QPoint, QPoint> Render::buscaArestaGrossa()
+{
 }
