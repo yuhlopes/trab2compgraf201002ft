@@ -47,6 +47,7 @@ private:
         void renderizaArestas(QList<QPair<QPoint,QPoint> > lista);
         void renderizaVertices(QList<QPoint> lista);
         void selecionados(void);
+        void reiniciaFrontBuffers(int w, int h);
 
         QImage* screen;
         QImage* buffer;
@@ -65,6 +66,9 @@ private:
         QMap<QPoint , QPoint> map;
         QPen arestaScreen;
         QPen selecionadoScreen;
+        QPen faceSelecionada;
+        QPen arestaSelecionada;
+        QPen verticeSelecionado;
         //QPen faceSelecionadaScreen;
         QRgb corArestaGrossa;
         QRgb corVerticeGrosso;

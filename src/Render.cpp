@@ -14,6 +14,7 @@ Render::Render(int w, int h, CommandQueue *c) {
     buffer = NULL;
     backBuffer = NULL;
     frontBuffer = NULL;
+    screen = NULL;
     
     zoom = 1.0;
     screen = new QImage(w,h,QImage::Format_RGB32);
@@ -31,6 +32,11 @@ Render::Render(int w, int h, CommandQueue *c) {
     verticeGrossoBack.setColor(corVerticeGrosso);
     arestaGrossaBack.setWidth(10);
     verticeGrossoBack.setWidth(10);
+
+    faceSelecionada.setColor(QColor(0,128,128,128));
+    arestaSelecionada.setColor(QColor(0,128,128,128));
+    verticeSelecionado.setColor(QColor(0,128,128,128));
+    arestaSelecionada.setWidth(10);
 
     mostraAresta = false;
     mostraFace = false;
@@ -171,10 +177,11 @@ void Render::recebeArquivo(const QString &filename)
  
 void Render::atualizaScreen(void)
 {
-    delete screen;
-    //fazer o sprite do frontBuffer por cima do buffer e passar para screen
-    screen = new QImage((buffer->copy(ponto->x(), ponto->y(),screenW,screenH)));
+    if(screen != NULL)
+        delete screen;
 
+    screen = new QImage(*buffer);
+    //fazer o sprite do frontBuffer por cima do buffer e passar para screen
     emit renderizado(*screen);
 }
 
@@ -338,7 +345,10 @@ void Render::selecionados(void)
     QRgb rgb = backBuffer->pixel(*sel);
     QPoint p = destransforma(*sel);
 
-    // Apagar o frontBuffer e pinta-lo de alfa
+    QPainter painter;
+    painter.begin(frontBuffer);
+    painter.fillRect(frontBuffer->rect(),QColor(255,255,255,255));
+    painter.end();
 
     if(mostraFace)
     {
@@ -389,17 +399,81 @@ void Render::selecionados(void)
 
 void Render::renderizaFaces(QList<QList<QPoint> > lista)
 {
-    // implementacao aqui
-    // desenhar no frontBuffer
+    QPainter buff(frontBuffer);
+    QPainterPath *path;
+    QPoint p;
+    int i,j;
 
+    for(i = 0; i < lista.size(); i++)
+    {
+        path = new QPainterPath();
+        p = transforma(lista[i][0]);
+        path->moveTo(p.x(),p.y());
+        for(j = 1; j  < lista[i].size(); j++)
+        {
+            p = transforma(lista[i][0]);
+            path->lineTo(p.x(),p.y());
+        }
+        p = transforma(lista[i][0]);
+        path->lineTo(p.x(),p.y());
+
+        buff.fillPath(*path,faceSelecionada.brush());
+        delete path;
+    }
 }
 void Render::renderizaArestas(QList<QPair<QPoint,QPoint> > lista)
 {
-    // implementacao aqui
-    // desenhar no frontBuffer
+    QPainter buff(frontBuffer);
+    QPoint p1,p2;
+    buff.setPen(arestaSelecionada);
+
+    for(int i = 0; i < lista.size(); i++)
+    {
+        p1 = transforma(lista[i].first);
+        p2 = transforma(lista[i].second);
+
+        buff.drawLine(p1,p2);
+    }
+
 }
 void Render::renderizaVertices(QList<QPoint> lista)
 {
-    // implementacao aqui
-    // desenhar no frontBuffer
+    QPainter buff(frontBuffer);
+    QPoint p;
+    buff.setPen(verticeSelecionado);
+
+    for(int i = 0; i < lista.size(); i++)
+    {
+        p = transforma(lista[i]);
+
+        buff.drawEllipse(p,5,5);
+    }
+}
+
+void Render::reiniciaFrontBuffers(int w, int h)
+{
+    if(buffer != NULL)
+        delete buffer;
+    if(backBuffer != NULL)
+        delete backBuffer;
+    if(frontBuffer != NULL)
+        delete frontBuffer;
+
+    buffer = new QImage(w,h,QImage::Format_RGB32);
+    backBuffer = new QImage(w,h,QImage::Format_RGB32);
+    frontBuffer = new QImage(w,h,QImage::Format_RGB32);
+
+
+    QPainter p;
+    p.begin(buffer);
+    p.setBackground(QBrush(QColor(255,255,255,0),Qt::SolidPattern));
+    p.end();
+    p.begin(backBuffer);
+    p.setBackground(QBrush(QColor(255,255,255,0),Qt::SolidPattern));
+    p.end();
+    p.begin(frontBuffer);
+    p.setBackground(QBrush(QColor(255,255,255,255),Qt::NoBrush));
+    p.end();
+
+
 }
