@@ -137,8 +137,14 @@ void Render::recebeArquivo(const QString &filename)
     mostraAresta = false;
     mostraFace = false;
     mostraPonto = false;
+    vsel = NULL;
+    hsel = NULL;
+    fsel = NULL;
 
     zoom = 1.0;
+    if(ponto == NULL)
+        ponto = new QPoint();
+
     ponto->setX(0);
     ponto->setY(0);
 
@@ -169,15 +175,14 @@ void Render::atualizaScreen(void)
     if(screen != NULL)
         delete screen;
 
-    screen = new QImage(buffer->width(), buffer->height(), QImage::Format_ARGB32_Premultiplied);
+    screen = new QImage(screenW, screenH, QImage::Format_ARGB32_Premultiplied);
     p.begin(screen);
     p.setCompositionMode(QPainter::CompositionMode_Source);
     //p.drawImage(0,0, *backBuffer);//debug
-    p.drawImage(0,0, *buffer);
+    p.drawImage(0,0, buffer->copy(ponto->x(),ponto->y(),screenW, screenH));
     p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    p.drawImage(0,0, *frontBuffer);
+    p.drawImage(0,0, frontBuffer->copy(ponto->x(),ponto->y(),screenW, screenH));
     p.end();
-    //fazer o sprite do frontBuffer por cima do buffer e passar para screen
     emit renderizado(*screen);
 }
 
@@ -185,7 +190,11 @@ void Render::incX()
 {
     qDebug() << "incX";
     if(ponto->x() + INCPOS + screenW < buffer->width())
+    {
+        qDebug() << "Posso";
         ponto->setX(ponto->x() + INCPOS);
+    }else
+        qDebug() << "Nao Posso";
 }
 void Render::decX()
 {
@@ -399,52 +408,80 @@ void Render::renderizaFront(void)
 
 void Render::renderizaFaces()
 {
-    QPainter buff(frontBuffer);
-    QPainterPath *path;
-    QPoint p;
-    int i,j;
-/*
+    HalfEdge *partida;
+    HalfEdge::iterator it;
 
+    if(vsel != NULL)
+        partida = vsel->getEdge();
+    if(hsel != NULL)
+        partida = hsel;
+    if(fsel != NULL)
+        partida = fsel->getOuterComp();
 
-    qDebug() << "entrou";
-    for(i = 0; i < lista.size(); i++)
+    if(vsel != NULL)
     {
-        path = new QPainterPath();
-        p = transforma(lista[i][0]);
-        path->moveTo(p.x(),p.y());
-        for(j = 1; j  < lista[i].size(); j++)
+        renderizaFace(partida, &visinhoScreen);
+        for(it = partida->v_begin(); it != partida->v_end(); ++it)
         {
-            p = transforma(lista[i][0]);
-            path->lineTo(p.x(),p.y());
+            renderizaFace(&it, &visinhoScreen);
         }
-        p = transforma(lista[i][0]);
-        path->lineTo(p.x(),p.y());
-
-        buff.fillPath(*path,visinhoScreen.brush());
-        delete path;
     }
-    if(i > 0)
-        qDebug() << "Faces no FrontBuffer";
-    */
+
+    if(hsel != NULL)
+    {
+        renderizaFace(partida, &visinhoScreen);
+        renderizaFace(partida->getTwin(), &visinhoScreen);
+    }
+
+    if(fsel != NULL)
+    {
+        renderizaFace(partida, &visinhoScreen);
+        for(it = partida->f_begin(); it != partida->f_end(); ++it)
+        {
+            renderizaFace(&it, &visinhoScreen);
+        }
+    }
 }
 void Render::renderizaArestas()
 {
     QPainter buff(frontBuffer);
-    QPoint p1,p2;
-    buff.setPen(visinhoScreen);
-    int i;
-/*
-    qDebug() << "entrou";
-    for(i = 0; i < lista.size(); i++)
-    {
-        p1 = transforma(lista[i].first);
-        p2 = transforma(lista[i].second);
+    QPoint p;
+    HalfEdge *partida;
+    HalfEdge::iterator it;
 
-        buff.drawLine(p1,p2);
+    buff.setPen(visinhoScreen);
+
+    if(vsel != NULL)
+        partida = vsel->getEdge();
+    if(hsel != NULL)
+        partida = hsel;
+    if(fsel != NULL)
+        partida = fsel->getOuterComp();
+
+    if(vsel != NULL || hsel != NULL)
+    {
+        for(it = partida->v_begin(); it != partida->v_end(); ++it)
+        {
+            buff.drawLine(transforma(it->getOrigem()->getPoint()), transforma(it->getDestino()->getPoint()));
+        }
+        if(hsel != NULL)
+        {
+            partida = partida->getTwin();
+            for(it = partida->v_begin(); it != partida->v_end(); ++it)
+            {
+                buff.drawLine(transforma(it->getOrigem()->getPoint()), transforma(it->getDestino()->getPoint()));
+            }
+        }else
+            buff.drawLine(transforma(partida->getOrigem()->getPoint()), transforma(partida->getDestino()->getPoint()));
     }
-    if(i > 0)
-        qDebug() << "Arestas no FrontBuffer";
-        */
+    if(fsel != NULL)
+    {
+        for(it = partida->f_begin(); it != partida->f_end(); ++it)
+        {
+            buff.drawLine(transforma(it->getOrigem()->getPoint()), transforma(it->getDestino()->getPoint()));
+        }
+        buff.drawLine(transforma(partida->getOrigem()->getPoint()), transforma(partida->getDestino()->getPoint()));
+    }
 
 }
 void Render::renderizaVertices()
@@ -511,11 +548,39 @@ void Render::reiniciaBuffers(int w, int h)
     p.fillRect(backBuffer->rect(),Qt::white);
     p.end();
     p.begin(frontBuffer);
-    //p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.fillRect(buffer->rect(), Qt::transparent);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.fillRect(frontBuffer->rect(), Qt::transparent);
     p.end();
 
     renderiza();
+    renderizaFront();
+}
+
+void Render::renderizaFace(HalfEdge *h, QPen *pen)
+{
+    QPainter buff(frontBuffer);
+    QPainterPath *path;
+    QPoint p;
+    HalfEdge::iterator it;
+
+    if(interface.isExterna(h->getFace()))
+        return;
+
+    buff.setPen(*pen);
+
+    path = new QPainterPath();
+    p = transforma(h->getOrigem()->getPoint());
+    path->moveTo(p.x(),p.y());
+    for(it = h->f_begin(); it !=  h->f_end(); ++it)
+    {
+        p = transforma(it->getOrigem()->getPoint());
+        path->lineTo(p.x(),p.y());
+    }
+    p = transforma(h->getOrigem()->getPoint());
+    path->lineTo(p.x(),p.y());
+
+    buff.fillPath(*path,visinhoScreen.brush());
+    delete path;
 }
 
 void Render::verticeSelecionado()
@@ -542,5 +607,8 @@ void Render::arestaSelecionada()
 }
 void Render::faceSelecionada()
 {
+    if(fsel == NULL)
+        return;
 
+    renderizaFace(fsel->getOuterComp(), &selecionadoScreen);
 }

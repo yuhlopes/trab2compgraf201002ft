@@ -20,6 +20,11 @@ inline bool operator< (const QPoint& p1, const QPoint& p2)
 
 }
 
+bool Interface::isExterna(Face* f)
+{
+    return (f == faceExterna);
+}
+
 QList<QPair<QPoint, QPoint> > Interface::getTodasArestas()
 {
     return map.keys();

@@ -44,6 +44,7 @@ private:
         QPoint destransforma(const QPoint &);
         void renderiza(void);
         void renderizaFaces(void);
+        void renderizaFace(HalfEdge *h, QPen *pen);
         void renderizaArestas(void);
         void renderizaVertices(void);
         void renderizaFront(void);

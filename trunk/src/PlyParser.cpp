@@ -32,12 +32,14 @@ PlyParser::PlyParser(const QString& filename)
 		    case 0: // primeira palavra
 		        *linha >> word;
 //		        qDebug() << "word:" << word;
-		        if(word == "comment"  || word == "format" || word == "property" || word == "ply")
+                        if(word == "comment"  || word == "format" || word == "property" || word == "ply" || word == "obj_info")
 		            estado = 3;
 		        else if(word == "element" )
 		            estado = 1;
-		        else if(word == "{")
-		            estado = 2;
+                        else if(word == "{"){
+                            qDebug() << "encontrei: {";
+                            estado = 2;
+                        }
 		        else if(word == NULL)
 		            estado = 3;
 		        else if (word == "end_header")
@@ -67,19 +69,19 @@ PlyParser::PlyParser(const QString& filename)
 		     case 2:
 		        *linha >> word;
 //   		         qDebug() << "word:" << word;
-		        if(word != "}")
+                        if(word == "}")
 		            estado = 0;
 		        else if(word == NULL){
-    		        delete linha;
-    		        s = stream.readLine();
-	                linha = new QTextStream(&s, QIODevice::ReadOnly);
+                            delete linha;
+                            s = stream.readLine();
+                            linha = new QTextStream(&s, QIODevice::ReadOnly);
 		        }
 		        break;
 		        
 		     case 3:
 		        delete linha;
    		        s = stream.readLine();
-                linha = new QTextStream(&s, QIODevice::ReadOnly);
+                        linha = new QTextStream(&s, QIODevice::ReadOnly);
 		        estado = 0;
 //                qDebug() << "fim de linha";
 		        break;
