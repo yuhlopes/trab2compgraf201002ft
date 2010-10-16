@@ -6,6 +6,7 @@ HalfEdge::HalfEdge()
     this->twin = NULL;
     this->ant = NULL;
     this->f = NULL;
+    this->origem = NULL;
 }
 
 void HalfEdge::setOrigem(Vertex *v)
@@ -38,6 +39,11 @@ Vertex* HalfEdge::getOrigem(void)
     return this->origem;
 }
 
+Vertex* HalfEdge::getDestino(void)
+{
+    return this->getProx()->getOrigem();
+}
+
 Face* HalfEdge::getFace(void)
 {
     return this->f;
@@ -60,6 +66,17 @@ HalfEdge* HalfEdge::getTwin(void)
 
 bool HalfEdge::operator==(HalfEdge& e)
 {
+    if(this->origem == e.getOrigem() && this->ant == e.ant && this->prox == e.prox &&
+       this->twin == e.getTwin() && this->f == e.getFace())
+        return true;
+
+
+    if(this->origem == NULL || this->prox == NULL || e.getProx() == NULL || e.getOrigem() == NULL)
+        return false;
+
+    if(this->prox->getOrigem() == NULL || e.getProx()->getOrigem())
+        return false;
+
     HalfEdge* t = this->getProx();
     HalfEdge* p = e.getProx();
     Vertex *v1 = this->getOrigem();
@@ -70,51 +87,65 @@ bool HalfEdge::operator==(HalfEdge& e)
     return ((*v1 == *v2) && (*u1 == *u2));
 }
 
-HalfEdge::iterator HalfEdge::begin()
+bool HalfEdge::operator!=(HalfEdge& e)
 {
-    iterator i(this);
-    return i;
+    return !(this->operator ==(e));
 }
 
-HalfEdge::iterator HalfEdge::end()
+HalfEdge* HalfEdge::self(void)
 {
-    iterator i((HalfEdge *)NULL);
-    return i;
+    return this;
 }
 
-HalfEdge::Iterator::Iterator(HalfEdge::Iterator *i)
+HalfEdge::iterator HalfEdge::v_begin()
 {
-    this->atual = &(i->operator *());
-    this->primeira = this->atual;
+    return Iterator(this->getTwin()->getProx(), Iterator::Vertice);
 }
-HalfEdge::Iterator::Iterator(HalfEdge *atual)
+HalfEdge::iterator HalfEdge::v_end()
 {
-    this->atual = atual;
-    this->primeira = this->atual;
+    return Iterator(this, Iterator::Vertice);
+}
+HalfEdge::iterator HalfEdge::f_begin()
+{
+    return Iterator(this->getProx(), Iterator::Face);
+}
+HalfEdge::iterator HalfEdge::f_end()
+{
+    return Iterator(this, Iterator::Face);
+}
+
+
+// Iterator
+HalfEdge::Iterator::Iterator(const HalfEdge::Iterator &i)
+{
+    this->atual = i.atual;
+    this->modo =  i.modo;
 }
 HalfEdge::Iterator::Iterator()
 {
     this->atual = NULL;
-    this->primeira = NULL;
+}
+HalfEdge::Iterator::Iterator(HalfEdge *atual, HalfEdge::Iterator::Modo modo)
+{
+    this->atual = atual;
+    this->modo =  modo;
 }
 HalfEdge::Iterator& HalfEdge::Iterator::operator++(int i)
 {
-    ++(*this);
     HalfEdge::Iterator it(*this);
+    ++(*this);
     return it;
 }
 
 HalfEdge::Iterator& HalfEdge::Iterator::operator++()
 {
-    if(atual != NULL)
-    {
-        this->atual = atual->getTwin();
-        this->atual = atual->getProx();
-        if(atual == primeira)
-        {
-            atual = NULL;
-        }
-    }
+
+    if(modo == HalfEdge::Iterator::Face)
+        atual = atual->getProx();
+
+    if(modo == HalfEdge::Iterator::Vertice)
+        atual = atual->getTwin()->getProx();
+
     return *this;
 }
 
@@ -125,19 +156,32 @@ HalfEdge* HalfEdge::Iterator::operator->()
 HalfEdge::Iterator& HalfEdge::Iterator::operator=(const HalfEdge::Iterator& i)
 {
     this->atual = i.atual;
+    this->modo = i.modo;
+
     return *this;
 }
 bool HalfEdge::Iterator::operator==(const HalfEdge::Iterator& i)const
 {
-    HalfEdge e;
-    if(atual == NULL)
-        return (e == i.operator *());
+    if(modo != i.modo)
+        return false;
 
-    return (*atual == *i);
+    if(atual == i.atual)
+        return true;
+
+    if(atual == NULL || i.atual == NULL)
+        return false;
+
+    return (*atual == *(i.atual));
 }
 bool HalfEdge::Iterator::operator!=(const HalfEdge::Iterator& i)const
 {
-    return ! (*this == i);
+    if(modo != i.modo)
+        return true;
+
+    if(atual == i.atual)
+        return false;
+
+    return (*atual != *(i.atual));
 }
 HalfEdge& HalfEdge::Iterator::operator*()const
 {
@@ -147,3 +191,4 @@ HalfEdge& HalfEdge::Iterator::operator*()const
 
     return *atual;
 }
+

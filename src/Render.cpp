@@ -15,9 +15,12 @@ Render::Render(int w, int h, CommandQueue *c) {
     backBuffer = NULL;
     frontBuffer = NULL;
     screen = NULL;
+    vsel = NULL;
+    hsel = NULL;
+    fsel = NULL;
     
     zoom = 1.0;
-    screen = new QImage(w,h,QImage::Format_RGB32);
+    screen = new QImage(w, h, QImage::Format_ARGB32_Premultiplied);
     ponto = new QPoint(0,0);
 
     corArestaGrossa = qRgb(255,255,0);
@@ -27,16 +30,15 @@ Render::Render(int w, int h, CommandQueue *c) {
 
     arestaScreen.setColor(QColor(0,0,0,255));
     selecionadoScreen.setColor(QColor(0,128,128,128));
+    selecionadoScreen.setColor(QColor(255,0,0,128));
+    selecionadoScreen.setWidth(10);
+    visinhoScreen.setColor(QColor(0,255,0,128));
+    visinhoScreen.setWidth(10);
     faceExternaBack.setColor(corFaceExt);
     arestaGrossaBack.setColor(corArestaGrossa);
     verticeGrossoBack.setColor(corVerticeGrosso);
     arestaGrossaBack.setWidth(10);
     verticeGrossoBack.setWidth(10);
-
-    faceSelecionada.setColor(QColor(0,128,128,128));
-    arestaSelecionada.setColor(QColor(0,128,128,128));
-    verticeSelecionado.setColor(QColor(0,128,128,128));
-    arestaSelecionada.setWidth(10);
 
     mostraAresta = false;
     mostraFace = false;
@@ -80,18 +82,22 @@ void Render::run(void) {
                 break;
             case PONTOS:
                 mostraPonto = !mostraPonto;
+                renderizaFront();
                 break;
             case ARESTAS:
                 mostraAresta = !mostraAresta;
+                renderizaFront();
                 break;
             case FACES:
                 mostraFace = !mostraFace;
+                renderizaFront();
                 break;
             case SELECT:
-                if(sel != NULL)
-                    delete sel;
-                sel = new QPoint(ex.x,ex.y);
-                selecionados();
+                if(sel == NULL)
+                    sel = new QPoint();
+                sel->setX(ex.x);
+                sel->setY(ex.y);
+                click();
                 break;
         }
         atualizaScreen();
@@ -106,16 +112,8 @@ void Render::updateScreen(int w, int h)
 
     if(buffer->width() < w || buffer->height() < h)
     {
-        if(buffer == NULL)
-        {
-           delete buffer;
-           delete backBuffer;
-           delete frontBuffer;
-        }
-        buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-        backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-        frontBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-        renderiza();
+        reiniciaBuffers(screenW * zoom, screenH * zoom);
+
     }
 
     if(ponto->x() + w > buffer->width())
@@ -143,16 +141,6 @@ void Render::recebeArquivo(const QString &filename)
     zoom = 1.0;
     ponto->setX(0);
     ponto->setY(0);
-    if(buffer != NULL)
-    {
-        delete buffer;
-        delete backBuffer;
-        delete frontBuffer;
-    }
-    buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    frontBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-
 
     //interface.clear();
 
@@ -163,30 +151,39 @@ void Render::recebeArquivo(const QString &filename)
     {
         qDebug() << tmp;
         interface.addFace(tmp);
-        qDebug() << "Passou";
+//        qDebug() << "Passou";
         tmp = ply.proximo();
     }
-    qDebug() << "Saiu";
     interface.addExtEdges();
-    qDebug() << "Completou";
-    renderiza();
-    qDebug() << "Renderizou";
-    
+
+    reiniciaBuffers(screenW * zoom, screenH * zoom);
+
+
     atualizaScreen();
  }
  
 void Render::atualizaScreen(void)
 {
+    QPainter p;
+
     if(screen != NULL)
         delete screen;
 
-    screen = new QImage(*buffer);
+    screen = new QImage(buffer->width(), buffer->height(), QImage::Format_ARGB32_Premultiplied);
+    p.begin(screen);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    //p.drawImage(0,0, *backBuffer);//debug
+    p.drawImage(0,0, *buffer);
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    p.drawImage(0,0, *frontBuffer);
+    p.end();
     //fazer o sprite do frontBuffer por cima do buffer e passar para screen
     emit renderizado(*screen);
 }
 
 void Render::incX()
 {
+    qDebug() << "incX";
     if(ponto->x() + INCPOS + screenW < buffer->width())
         ponto->setX(ponto->x() + INCPOS);
 }
@@ -200,11 +197,13 @@ void Render::decX()
 }
 void Render::incY()
 {
+    qDebug() << "incY";
     if(ponto->y() + INCPOS + screenH < buffer->height())
         ponto->setY(ponto->y() + INCPOS);
 }
 void Render::decY()
 {
+    qDebug() << "decY";
     if(ponto->y() - INCPOS >= 0)
         ponto->setY(ponto->y() - INCPOS);
     else
@@ -220,24 +219,10 @@ void Render::incZoom()
     else
         zoom = ZOOMLIMIT;
 
-    if(buffer != NULL)
-    {
-        delete buffer;
-        delete backBuffer;
-        delete frontBuffer;
-    }
-    //qDebug() << "Deletou";
-    buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    frontBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    //qDebug() << "Criou";
-    renderiza();
+    reiniciaBuffers(screenW * zoom, screenH * zoom);
 }
 void Render::decZoom()
 {
-    int w = screenW;
-    int h = screenH;
-
     if(zoom == 1.0)
         return;
 
@@ -246,24 +231,12 @@ void Render::decZoom()
     else
         zoom = 1.0;
 
-    if(buffer == NULL)
-    {
-        delete buffer;
-        delete backBuffer;
-        delete frontBuffer;
-    }
-    buffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    backBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
-    frontBuffer = new QImage(screenW * zoom, screenH * zoom, QImage::Format_RGB32);
+    if(ponto->x() + screenW > screenW*zoom)
+        ponto->setX(screenW*zoom - screenW);
+    if(ponto->y() + screenH > screenH*zoom)
+        ponto->setY(screenH*zoom - screenH);
 
-
-
-    if(ponto->x() + w > buffer->width())
-        ponto->setX(buffer->width() - w);
-    if(ponto->y() + h > buffer->height())
-        ponto->setY(buffer->height() - h);
-
-    renderiza();
+    reiniciaBuffers(screenW * zoom, screenH * zoom);
 }
 
 QPoint Render::transforma(const QPoint &in)
@@ -294,17 +267,37 @@ QPoint Render::transforma(const QPoint &in)
     int y = sy*in.y() - sy*ywmin + ymin + 0.5;
 
     QPoint p(x, y);
-    map[p] = in;
     return p;
 }
 QPoint Render::destransforma(const QPoint &in)
 {
-    QPoint p;
-    QMap<QPoint, QPoint>::Iterator it = map.find(in);
-    if(it != map.end())
-        return it.value();
+    int xwmax, xwmin, ywmax, ywmin;
+    int xmax, xmin, ymax, ymin;
+    double sx,sy;
+
+    xwmin = buffer->width() * MARGEM;
+    ywmin = buffer->height() * MARGEM;
+    xwmax = buffer->width() - xwmin;
+    ywmax = buffer->height() - ywmin;
+
+    xmin = interface.getMinX();
+    xmax = interface.getMaxX();
+    ymin = interface.getMinY();
+    ymax = interface.getMaxY();
+
+    sx = (xmax - xmin + 0.0)/(xwmax - xwmin + 0.0);
+    sy = (ymax - ymin + 0.0)/(ywmax - ywmin + 0.0);
+
+    if(sx > sy)
+        sy = sx;
     else
-        return p;
+        sx = sy;
+
+    int x = sx*in.x() - sx*xwmin + xmin + 0.5;
+    int y = sy*in.y() - sy*ywmin + ymin + 0.5;
+
+    QPoint p(x, y);
+    return p;
 }
 
 void Render::renderiza(void)
@@ -313,14 +306,12 @@ void Render::renderiza(void)
     QList<QPair<QPoint,QPoint> > lista = interface.getTodasArestas();
     QPainter buff(buffer);
     QPainter back(backBuffer);
-    //QBrush b(branco);
 
-    buff.fillRect(0,0,buffer->width(), buffer->height(),QColor(corFace));
-    back.fillRect(0,0,buffer->width(), buffer->height(),QColor(corFace));
+    buff.fillRect(buffer->rect(),Qt::transparent);
+    back.fillRect(backBuffer->rect(), Qt::transparent);
 
     buff.setPen(arestaScreen);
 
-    map.clear();
     for(int i = 0; i < lista.size() ; ++i)
     {
         p1 = transforma(lista[i].first);
@@ -336,74 +327,86 @@ void Render::renderiza(void)
     }
 }
 
-void Render::selecionados(void)
+void Render::click(void)
 {
-    qDebug() << "selciona: x=" << sel->x() << ", y=" << sel->y();
-    sel->setX(sel->x() + ponto->x());
-    sel->setY(sel->y() + ponto->y());
+    Vertex* v = NULL;
+    HalfEdge* h = NULL;
+    Face *f = NULL;
+    HalfEdge* t = NULL;
+    QPoint p1;
 
-    QRgb rgb = backBuffer->pixel(*sel);
-    QPoint p = destransforma(*sel);
+    p1.setX(sel->x() + ponto->x());
+    p1.setY(sel->y() + ponto->y());
 
-    QPainter painter;
-    painter.begin(frontBuffer);
-    painter.fillRect(frontBuffer->rect(),QColor(255,255,255,255));
-    painter.end();
+    QRgb rgb = backBuffer->pixel(p1);
+    p1 = destransforma(p1);
+
+    if(rgb == corVerticeGrosso)
+    {
+        qDebug() << "Vertice";
+        v = interface.getVerticeNear(p1);
+    }else if(rgb == corArestaGrossa)
+    {
+        qDebug() << "Aresta";
+        h = interface.getArestaNear(p1);
+    }else if(rgb == corFace)
+    {
+        qDebug() << "Face";
+        f = interface.getFaceNear(p1);
+    }
+
+    if(hsel != NULL)
+        t = hsel->getTwin();
+
+    if(v == vsel && (h == hsel || h == t) && f == fsel)
+    {
+        vsel = NULL;
+        hsel = NULL;
+        fsel = NULL;
+    }else
+    {
+        vsel = v;
+        hsel = h;
+        fsel = f;
+    }
+
+    renderizaFront();
+}
+
+void Render::renderizaFront(void)
+{
+    QPainter p(frontBuffer);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.fillRect(frontBuffer->rect(), Qt::transparent);
+    p.end();
 
     if(mostraFace)
-    {
-        if(rgb == corVerticeGrosso)
-        {
-            renderizaFaces(interface.getFacesNearVertice(interface.getVerticeNear(p)));
-        }else if(rgb == corArestaGrossa)
-        {
-            renderizaFaces(interface.getFacesNearAresta(interface.getArestaNear(p)));
-        }else if(rgb == corFace)
-        {
-            renderizaFaces(interface.getFacesNearFace(interface.getFaceNear(p)));
-        }
-    }
+        renderizaFaces();
 
     if(mostraAresta)
-    {
-        if(rgb == corVerticeGrosso)
-        {
-            renderizaArestas(interface.getArestasNearVertice(interface.getVerticeNear(p)));
-        }else if(rgb == corArestaGrossa)
-        {
-            renderizaArestas(interface.getArestasNearAresta(interface.getArestaNear(p)));
-        }else if(rgb == corFace)
-        {
-            renderizaArestas(interface.getArestasNearFace(interface.getFaceNear(p)));
-        }
-    }
+        renderizaArestas();
 
     if(mostraPonto)
-    {
-        if(rgb == corVerticeGrosso)
-        {
-            renderizaVertices(interface.getVerticesNearVertice(interface.getVerticeNear(p)));
-        }else if(rgb == corArestaGrossa)
-        {
-            renderizaVertices(interface.getVerticesNearAresta(interface.getArestaNear(p)));
-        }else if(rgb == corFace)
-        {
-            renderizaVertices(interface.getVerticesNearFace(interface.getFaceNear(p)));
-        }
-    }
+        renderizaVertices();
 
+    verticeSelecionado();
+    arestaSelecionada();
+    faceSelecionada();
     // Faltou fazer para face externa caso precise
 
     atualizaScreen();
 }
 
-void Render::renderizaFaces(QList<QList<QPoint> > lista)
+void Render::renderizaFaces()
 {
     QPainter buff(frontBuffer);
     QPainterPath *path;
     QPoint p;
     int i,j;
+/*
 
+
+    qDebug() << "entrou";
     for(i = 0; i < lista.size(); i++)
     {
         path = new QPainterPath();
@@ -417,40 +420,76 @@ void Render::renderizaFaces(QList<QList<QPoint> > lista)
         p = transforma(lista[i][0]);
         path->lineTo(p.x(),p.y());
 
-        buff.fillPath(*path,faceSelecionada.brush());
+        buff.fillPath(*path,visinhoScreen.brush());
         delete path;
     }
+    if(i > 0)
+        qDebug() << "Faces no FrontBuffer";
+    */
 }
-void Render::renderizaArestas(QList<QPair<QPoint,QPoint> > lista)
+void Render::renderizaArestas()
 {
     QPainter buff(frontBuffer);
     QPoint p1,p2;
-    buff.setPen(arestaSelecionada);
-
-    for(int i = 0; i < lista.size(); i++)
+    buff.setPen(visinhoScreen);
+    int i;
+/*
+    qDebug() << "entrou";
+    for(i = 0; i < lista.size(); i++)
     {
         p1 = transforma(lista[i].first);
         p2 = transforma(lista[i].second);
 
         buff.drawLine(p1,p2);
     }
+    if(i > 0)
+        qDebug() << "Arestas no FrontBuffer";
+        */
 
 }
-void Render::renderizaVertices(QList<QPoint> lista)
+void Render::renderizaVertices()
 {
     QPainter buff(frontBuffer);
     QPoint p;
-    buff.setPen(verticeSelecionado);
+    HalfEdge *partida;
+    HalfEdge::iterator it;
 
-    for(int i = 0; i < lista.size(); i++)
+    buff.setPen(visinhoScreen);
+
+    if(vsel != NULL)
+        partida = vsel->getEdge();
+    if(hsel != NULL)
+        partida = hsel;
+    if(fsel != NULL)
+        partida = fsel->getOuterComp();
+
+    if(vsel != NULL || hsel != NULL)
     {
-        p = transforma(lista[i]);
-
-        buff.drawEllipse(p,5,5);
+        for(it = partida->v_begin(); it != partida->v_end(); ++it)
+        {
+            buff.drawEllipse(transforma(it->getDestino()->getPoint()), 5,5);
+        }
+        if(hsel != NULL)
+        {
+            partida = partida->getTwin();
+            for(it = partida->v_begin(); it != partida->v_end(); ++it)
+            {
+                buff.drawEllipse(transforma(it->getDestino()->getPoint()), 5,5);
+            }
+        }else
+            buff.drawEllipse(transforma(partida->getDestino()->getPoint()), 5,5);
+    }
+    if(fsel != NULL)
+    {
+        for(it = partida->f_begin(); it != partida->f_end(); ++it)
+        {
+            buff.drawEllipse(transforma(it->getOrigem()->getPoint()), 5,5);
+        }
+        buff.drawEllipse(transforma(partida->getOrigem()->getPoint()), 5,5);
     }
 }
 
-void Render::reiniciaFrontBuffers(int w, int h)
+void Render::reiniciaBuffers(int w, int h)
 {
     if(buffer != NULL)
         delete buffer;
@@ -459,21 +498,49 @@ void Render::reiniciaFrontBuffers(int w, int h)
     if(frontBuffer != NULL)
         delete frontBuffer;
 
-    buffer = new QImage(w,h,QImage::Format_RGB32);
-    backBuffer = new QImage(w,h,QImage::Format_RGB32);
-    frontBuffer = new QImage(w,h,QImage::Format_RGB32);
+    buffer = new QImage(w, h, QImage::Format_ARGB32_Premultiplied);
+    backBuffer = new QImage(w, h, QImage::Format_ARGB32_Premultiplied);
+    frontBuffer = new QImage(w, h, QImage::Format_ARGB32_Premultiplied);
 
 
     QPainter p;
     p.begin(buffer);
-    p.setBackground(QBrush(QColor(255,255,255,0),Qt::SolidPattern));
+    p.fillRect(buffer->rect(), Qt::white);
     p.end();
     p.begin(backBuffer);
-    p.setBackground(QBrush(QColor(255,255,255,0),Qt::SolidPattern));
+    p.fillRect(backBuffer->rect(),Qt::white);
     p.end();
     p.begin(frontBuffer);
-    p.setBackground(QBrush(QColor(255,255,255,255),Qt::NoBrush));
+    //p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.fillRect(buffer->rect(), Qt::transparent);
     p.end();
 
+    renderiza();
+}
+
+void Render::verticeSelecionado()
+{
+    QPainter p(frontBuffer);
+
+    if(vsel == NULL)
+        return;
+
+    p.setPen(selecionadoScreen);
+    p.drawEllipse(transforma(vsel->getPoint()),5,5);
+
+}
+void Render::arestaSelecionada()
+{
+     QPainter p(frontBuffer);
+
+    if(hsel == NULL)
+        return;
+
+    p.setPen(selecionadoScreen);
+    p.drawLine(transforma(hsel->getOrigem()->getPoint()), transforma(hsel->getDestino()->getPoint()));
+
+}
+void Render::faceSelecionada()
+{
 
 }

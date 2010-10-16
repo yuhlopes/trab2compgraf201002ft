@@ -13,9 +13,11 @@ RenderPanel::RenderPanel(CommandQueue *c)
     connect(this, SIGNAL(atualizaTamanho(int, int)), r, SLOT(updateScreen(int, int)), Qt::QueuedConnection);
     connect(this, SIGNAL(enviaArquivo(const QString &)), r, SLOT(recebeArquivo(const QString &)), Qt::QueuedConnection);
     
-    QImage tmp(screenW, screenH,QImage::Format_RGB32);
-    QPainter p(&tmp);
-    p.fillRect(tmp.rect(),QColor(255,255,255,255));
+    QImage tmp(screenW, screenH,QImage::Format_ARGB32_Premultiplied);
+    QPainter p;
+    p.begin(&tmp);
+    p.fillRect(tmp.rect(), Qt::white);
+    p.end();
     fundolb->setPixmap(QPixmap::fromImage(tmp));
     fundolb->show();
 
@@ -25,8 +27,6 @@ RenderPanel::RenderPanel(CommandQueue *c)
 
 void RenderPanel::update(const QImage& screen)
 {
-    //qDebug() << "Renderizando";
-    //qDebug() << "#" << screen.width() << "x" << screen.height() <<"#";
     fundolb->setPixmap(QPixmap::fromImage(screen));
     fundolb->show();
     repaint();
