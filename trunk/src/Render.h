@@ -43,12 +43,20 @@ private:
         QPoint transforma(const QPoint &);
         QPoint destransforma(const QPoint &);
         void renderiza(void);
-        void renderizaFaces(QList<QList<QPoint> > lista);
-        void renderizaArestas(QList<QPair<QPoint,QPoint> > lista);
-        void renderizaVertices(QList<QPoint> lista);
-        void selecionados(void);
-        void reiniciaFrontBuffers(int w, int h);
+        void renderizaFaces(void);
+        void renderizaArestas(void);
+        void renderizaVertices(void);
+        void renderizaFront(void);
+        void click(void);
+        //void escolha(void);
+        void reiniciaBuffers(int w, int h);
+        void verticeSelecionado(void);
+        void arestaSelecionada(void);
+        void faceSelecionada(void);
 
+        Vertex* vsel;
+        HalfEdge* hsel;
+        Face* fsel;
         QImage* screen;
         QImage* buffer;
         QImage* backBuffer;
@@ -66,10 +74,8 @@ private:
         QMap<QPoint , QPoint> map;
         QPen arestaScreen;
         QPen selecionadoScreen;
-        QPen faceSelecionada;
-        QPen arestaSelecionada;
-        QPen verticeSelecionado;
-        //QPen faceSelecionadaScreen;
+        QPen visinhoScreen;
+
         QRgb corArestaGrossa;
         QRgb corVerticeGrosso;
         QRgb corFace;

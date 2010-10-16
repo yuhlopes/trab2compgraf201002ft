@@ -36,3 +36,8 @@ QPoint Vertex::getPoint(void) const
 {
     return p;
 }
+
+HalfEdge* Vertex::getEdge(void)
+{
+    return hEdge;
+}

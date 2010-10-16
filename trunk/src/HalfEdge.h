@@ -20,36 +20,44 @@ void setTwin(HalfEdge *twin);
 void setProx(HalfEdge *prox);
 void setAnt(HalfEdge *ant);
 Vertex*   getOrigem(void);
+Vertex*   getDestino(void);
 Face*     getFace(void);
 HalfEdge* getTwin(void);
 HalfEdge* getProx(void);
 HalfEdge* getAnt(void);
 bool operator==(HalfEdge& );
+bool operator!=(HalfEdge& );
+HalfEdge* self(void);
 
- class Iterator
+
+    class Iterator
     {
     private:
-        HalfEdge* primeira;
+
 
     public:
-        Iterator(Iterator* i);
-        Iterator(HalfEdge *atual);
+        enum Modo{Vertice,Face};
         Iterator();
-         Iterator& operator++(int i);
-         Iterator& operator++();
-         HalfEdge* operator->();
-         Iterator& operator=(const Iterator& i);
-         bool operator==(const Iterator& i)const;
-         bool operator!=(const Iterator& i)const;
-         HalfEdge& operator*()const;
+        Iterator(const Iterator& i);
+        Iterator(HalfEdge *atual, Modo modo);
+        Iterator& operator++(int i);
+        Iterator& operator++();
+        HalfEdge* operator->();
+        Iterator& operator=(const Iterator& i);
+        bool operator==(const Iterator& i)const;
+        bool operator!=(const Iterator& i)const;
+        HalfEdge& operator*()const;
 
-         HalfEdge* atual;
+        HalfEdge* atual;
+        Modo modo;
 
     };
 
     typedef HalfEdge::Iterator iterator;
-    iterator begin();
-    iterator end();
+    iterator v_begin();
+    iterator v_end();
+    iterator f_begin();
+    iterator f_end();
 
 private:
     Vertex *origem;
