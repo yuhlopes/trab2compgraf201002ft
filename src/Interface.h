@@ -29,15 +29,17 @@ QList<QPair<QPoint, QPoint> > getTodasArestas();
 HalfEdge* getArestaNear(QPoint p);
 Face* getFaceNear(QPoint p);
 Vertex* getVerticeNear(QPoint p);
+bool isExterna(Face* f);
 
 
-Face *faceExterna;
+
 
 private:
     QMap<QPoint,Vertex*> vertices;
     QVector<Face*> faces;
     QMap<QPair<QPoint,QPoint>, HalfEdge *> map;
     int minX, minY, maxX, maxY;
+    Face *faceExterna;
 
     Vertex* addVertex(QPoint p);
     void adicionaface(HalfEdge* e, Face* f);

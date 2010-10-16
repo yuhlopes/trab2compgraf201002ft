@@ -27,7 +27,7 @@ HalfEdge* getProx(void);
 HalfEdge* getAnt(void);
 bool operator==(HalfEdge& );
 bool operator!=(HalfEdge& );
-HalfEdge* self(void);
+//HalfEdge* self(void);
 
 
     class Iterator
@@ -47,6 +47,8 @@ HalfEdge* self(void);
         bool operator==(const Iterator& i)const;
         bool operator!=(const Iterator& i)const;
         HalfEdge& operator*()const;
+        HalfEdge* operator&();
+
 
         HalfEdge* atual;
         Modo modo;

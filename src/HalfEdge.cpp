@@ -92,10 +92,10 @@ bool HalfEdge::operator!=(HalfEdge& e)
     return !(this->operator ==(e));
 }
 
-HalfEdge* HalfEdge::self(void)
-{
-    return this;
-}
+//HalfEdge* HalfEdge::self(void)
+//{
+//    return this;
+//}
 
 HalfEdge::iterator HalfEdge::v_begin()
 {
@@ -148,7 +148,10 @@ HalfEdge::Iterator& HalfEdge::Iterator::operator++()
 
     return *this;
 }
-
+HalfEdge* HalfEdge::Iterator::operator&()
+{
+    return this->atual;
+}
 HalfEdge* HalfEdge::Iterator::operator->()
 {
     return this->atual;
