@@ -170,6 +170,8 @@ HalfEdge* Interface::getArestaNear(QPointF p)
     QPointF p1, p2;
     double min = INF;
 
+    //qDebug() << "Ponto p: " << p;
+
     for (int i = 0; i < lista->size(); i++)
     {
         e = lista->at(i);
@@ -177,15 +179,19 @@ HalfEdge* Interface::getArestaNear(QPointF p)
         p1 = e->getOrigem()->getPoint();
         p2 = e->getDestino()->getPoint();
 
-        double mod2 = eProd(p2-p1, p2-p1);
+       // qDebug() << "Reta: " << p1 << " - " << p2;
+
+        double mod2 = modulo2(p1,p2);
 
         double u = ((p.x() - p1.x())*(p2.x() - p1.x())) + ((p.y() - p1.y())*(p2.y() - p1.y()));
         u = u / mod2;
 
-        double x = p.x() + u * (p2.x() - p1.x());
-        double y = p.y() + u * (p2.y() - p1.y());
+        double x = p1.x() + u * (p2.x() - p1.x());
+        double y = p1.y() + u * (p2.y() - p1.y());
 
         double dist2 = (p.x() - x)*(p.x() - x) + (p.y() - y)*(p.y() - y);
+
+       // qDebug() << "dist2 " << dist2 << "min " << min;
 
         if (dist2 < min)
         {
@@ -197,49 +203,7 @@ HalfEdge* Interface::getArestaNear(QPointF p)
 
     return best;
 
-    /*
-    double dist;
-    double mindist = INF;
-    HalfEdge *min;
-    HalfEdge *it;
-    QLineF v,u;
-    QPointF inter;
-    QLineF::IntersectType intertype;
 
-    // muito errado!!!!
-
-    for(int i = 0; i < lista->size(); ++i)
-    {
-        it = lista->operator [](i);
-
-        v.setP1(it->getOrigem()->getPoint());
-        v.setP2(it->getDestino()->getPoint());
-
-        u = v.normalVector();
-        u.translate(p);
-
-        intertype = v.intersect(u,&inter);
-        if((v.p1().x()-inter.x())*(inter.x()-v.p2().x()) >= 0 && (v.p1().y()-inter.y())*(inter.y()-v.p2().y()) >= 0)
-        {
-            dist = sqrt((p.x()-inter.x())*(p.x()-inter.x()) + (p.y()-inter.y())*(p.y()-inter.y()));
-        }else
-        {
-            double tmp = sqrt((p.x()-v.p1().x())*(p.x()-v.p1().x()) + (p.y()-v.p1().y())*(p.y()-v.p1().y()));
-                  dist = sqrt((p.x()-v.p2().x())*(p.x()-v.p2().x()) + (p.y()-v.p2().y())*(p.y()-v.p2().y()));
-            if(tmp < dist)
-                dist = tmp;
-        }
-
-        if(dist < mindist)
-        {
-            mindist = dist;
-            min = it;
-        }
-    }
-
-    return min;
-
-    */
 }
 Face* Interface::getFaceNear(QPointF p)
 {
@@ -250,6 +214,7 @@ Face* Interface::getFaceNear(QPointF p)
 
     return min->getTwin()->getFace();
 }
+
 Vertex* Interface::getVerticeNear(QPointF p)
 {
     QList<HalfEdge *> *lista = kdt->find(p);
@@ -304,4 +269,13 @@ double Interface::vProd(QPointF p1, QPointF p2)
 double Interface::eProd(QPointF p1, QPointF p2)
 {
     return (p1.x() * p2.x() + p1.y() * p2.y());
+}
+
+double Interface::modulo2(QPointF p1, QPointF p2)
+{
+    double x = p2.x() - p1.x();
+    double y = p2.y() - p1.y();
+
+    return (x*x + y*y);
+
 }
