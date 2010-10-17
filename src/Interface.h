@@ -32,7 +32,8 @@ Face* getFaceNear(QPointF p);
 Vertex* getVerticeNear(QPointF p);
 bool isExterna(Face* f);
 
-
+double vProd(QPointF p1, QPointF p2);
+double eProd(QPointF p1, QPointF p2);
 
 
 private:

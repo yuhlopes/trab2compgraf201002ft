@@ -75,7 +75,7 @@ private:
         QMap<QPoint , QPoint> map;
         QPen arestaScreen;
         QPen selecionadoScreen;
-        QPen visinhoScreen;
+        QPen vizinhoScreen;
 
         QRgb corArestaGrossa;
         QRgb corVerticeGrosso;

@@ -8,6 +8,8 @@
 #include <QLineF>
 #include <QDebug>
 
+#define NAO(a) ((a < 0.0000000001)?(1):(0))
+
 typedef struct _NO
 {
     double chave;
@@ -34,6 +36,9 @@ private:
     bool cruza(const QLineF &v, const QLineF &u);
     QList<HalfEdge *>* busca(const QPointF &p, NO* no,bool primeiro);
     void limpa(NO*);
+
+    double vProd(QPointF p1, QPointF p2);
+    double eProd(QPointF p1, QPointF p2);
 
 public:
     KDTree(const QList<HalfEdge *> &list, QRectF limite);

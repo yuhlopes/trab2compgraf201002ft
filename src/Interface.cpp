@@ -165,6 +165,39 @@ void Interface::addExtEdges(void)
 HalfEdge* Interface::getArestaNear(QPointF p)
 {
     QList<HalfEdge *> *lista = kdt->find(p);
+
+    HalfEdge *e, *best = NULL;
+    QPointF p1, p2;
+    double min = INF;
+
+    for (int i = 0; i < lista->size(); i++)
+    {
+        e = lista->at(i);
+
+        p1 = e->getOrigem()->getPoint();
+        p2 = e->getDestino()->getPoint();
+
+        double mod2 = eProd(p2-p1, p2-p1);
+
+        double u = ((p.x() - p1.x())*(p2.x() - p1.x())) + ((p.y() - p1.y())*(p2.y() - p1.y()));
+        u = u / mod2;
+
+        double x = p.x() + u * (p2.x() - p1.x());
+        double y = p.y() + u * (p2.y() - p1.y());
+
+        double dist2 = (p.x() - x)*(p.x() - x) + (p.y() - y)*(p.y() - y);
+
+        if (dist2 < min)
+        {
+            min = dist2;
+            best = e;
+        }
+
+    }
+
+    return best;
+
+    /*
     double dist;
     double mindist = INF;
     HalfEdge *min;
@@ -205,6 +238,8 @@ HalfEdge* Interface::getArestaNear(QPointF p)
     }
 
     return min;
+
+    */
 }
 Face* Interface::getFaceNear(QPointF p)
 {
@@ -259,4 +294,14 @@ bool Interface::dentroFace(HalfEdge* h, QPointF p)
     QPolygonF po(list);
 
     return po.containsPoint(p, Qt::OddEvenFill);
+}
+
+double Interface::vProd(QPointF p1, QPointF p2)
+{
+    return (p1.x() * p2.y() - p1.y() * p2.x());
+}
+
+double Interface::eProd(QPointF p1, QPointF p2)
+{
+    return (p1.x() * p2.x() + p1.y() * p2.y());
 }
