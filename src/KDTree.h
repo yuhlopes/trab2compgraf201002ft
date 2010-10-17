@@ -5,6 +5,8 @@
 #include <QPointF>
 #include "HalfEdge.h"
 #include <QRect>
+#include <QLineF>
+#include <QDebug>
 
 typedef struct _NO
 {
@@ -13,6 +15,12 @@ typedef struct _NO
     _NO *dir;
     QList<HalfEdge*> *lista;
 }NO;
+
+typedef struct _SORTEADOR
+{
+    double val;
+    int ind;
+}SORTEADOR;
 
 class KDTree : QObject
 {
@@ -23,12 +31,16 @@ private:
 
     NO* divide(QList<HalfEdge *> *list, QRectF limite, bool primeiro);
     double pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, QList<HalfEdge *> *men, QList<HalfEdge *> *mai);
-    bool cruza(QPointF v1, QPointF v2 , QPointF u1, QPointF u2);
+    bool cruza(const QLineF &v, const QLineF &u);
     QList<HalfEdge *>* busca(const QPointF &p, NO* no,bool primeiro);
+    void limpa(NO*);
 
 public:
     KDTree(const QList<HalfEdge *> &list, QRectF limite);
+    virtual ~KDTree();
     QList<HalfEdge *> *find(const QPointF &p);
 };
+
+bool operator<(const SORTEADOR& s1, const SORTEADOR& s2);
 
 #endif // KDTREE_H

@@ -6,6 +6,7 @@
 #include "Vertex.h"
 #include "HalfEdge.h"
 #include "Face.h"
+#include "KDTree.h"
 
 #define EXTERNA NULL
 #define INF 0x3F3F3F3F
@@ -18,33 +19,33 @@ class Interface : public QObject
 public:
     Interface();
 
-HalfEdge* findTwin(QPoint u,QPoint v);
-void addFace(QVector<QPoint> in);
+HalfEdge* findTwin(QPointF u,QPointF v);
+void addFace(QVector<QPointF> in);
 void addExtEdges(void);
-int getMaxX(void){ return maxX; }
-int getMaxY(void){ return maxY; }
-int getMinX(void){ return minX; }
-int getMinY(void){ return minY; }
-QList<QPair<QPoint, QPoint> > getTodasArestas();
-HalfEdge* getArestaNear(QPoint p);
-Face* getFaceNear(QPoint p);
-Vertex* getVerticeNear(QPoint p);
+double getMaxX(void){ return maxX; }
+double getMaxY(void){ return maxY; }
+double getMinX(void){ return minX; }
+double getMinY(void){ return minY; }
+QList<QPair<QPointF, QPointF> > getTodasArestas();
+HalfEdge* getArestaNear(QPointF p);
+Face* getFaceNear(QPointF p);
+Vertex* getVerticeNear(QPointF p);
 bool isExterna(Face* f);
 
 
 
 
 private:
-    QMap<QPoint,Vertex*> vertices;
+    KDTree *kdt;
+    QMap<QPointF,Vertex*> vertices;
     QVector<Face*> faces;
-    QMap<QPair<QPoint,QPoint>, HalfEdge *> map;
-    int minX, minY, maxX, maxY;
+    QMap<QPair<QPointF,QPointF>, HalfEdge *> map;
+    double minX, minY, maxX, maxY;
     Face *faceExterna;
 
-    Vertex* addVertex(QPoint p);
+    Vertex* addVertex(QPointF p);
     void adicionaface(HalfEdge* e, Face* f);
+    bool dentroFace(HalfEdge* h, QPointF p);
 };
-
-inline bool operator< (const QPoint& p1, const QPoint& p2);
 
 #endif // INTERFACE_H
