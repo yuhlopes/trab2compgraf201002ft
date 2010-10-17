@@ -612,8 +612,6 @@ void Render::arestaSelecionada()
     p.setPen(selecionadoScreen);
     p.drawLine(transforma(hsel->getOrigem()->getPoint()), transforma(hsel->getDestino()->getPoint()));
 
-    qDebug() << "Desenhar de " << transforma(hsel->getOrigem()->getPoint()) << "a " << transforma(hsel->getDestino()->getPoint()) << "!";
-
 }
 void Render::faceSelecionada()
 {
