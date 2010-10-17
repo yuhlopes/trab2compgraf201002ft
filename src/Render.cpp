@@ -153,12 +153,19 @@ void Render::recebeArquivo(const QString &filename)
     PlyParser ply(filename);
     
     tmp = ply.proximo();
-    while(tmp.size() > 0)
+
+    // while(tmp.size() > 0)
+
+    int i_faces = 0;
+    while (i_faces < ply.getNFaces())
     {
         qDebug() << tmp;
         interface.addFace(tmp);
 //        qDebug() << "Passou";
+
         tmp = ply.proximo();
+
+        i_faces++;
     }
     interface.addExtEdges();
 

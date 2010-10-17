@@ -1,5 +1,5 @@
 ply
-ormat ascii 1.0           { ascii/binary, format version number }
+format ascii 1.0           { ascii/binary, format version number }
 comment made by anonymous  { comments are keyword specified }
 comment this file is a cube
 element vertex 11           { define "vertex" element, 8 in file }

@@ -7,8 +7,9 @@
 #include <QRect>
 #include <QLineF>
 #include <QDebug>
+#include <cmath>
 
-#define NAO(a) ((a < 0.0000000001)?(1):(0))
+#define NAO(a) (((fabs(a)) < 0.0000000001)?(1):(0))
 
 typedef struct _NO
 {
