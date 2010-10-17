@@ -20,6 +20,9 @@ public:
     QPointF getPoint(void) const;
     HalfEdge* getEdge(void);
 
+    double vProd(QPointF p1, QPointF p2);
+    double eProd(QPointF p1, QPointF p2);
+
    private:
     QPointF p;
     HalfEdge *hEdge;

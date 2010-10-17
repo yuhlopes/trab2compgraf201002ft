@@ -47,3 +47,13 @@ HalfEdge* Vertex::getEdge(void)
 {
     return hEdge;
 }
+
+double Vertex::vProd(QPointF p1, QPointF p2)
+{
+    return (p1.x() * p2.y() - p1.y() * p2.x());
+}
+
+double Vertex::eProd(QPointF p1, QPointF p2)
+{
+    return (p1.x() * p2.x() + p1.y() * p2.y());
+}

@@ -166,12 +166,28 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
         return p->getOrigem()->getPoint().y();
 
 }
+
+
+
 bool KDTree::cruza(const QLineF &v, const QLineF &u)
 {
-    QPointF p;
+    QPointF p = v.p1();
+    QPointF q = v.p2();
 
-    if(v.intersect(u,&p) == QLineF::BoundedIntersection)
-        return true;
+    QPointF r = u.p1();
+    QPointF s = u.p2();
+
+   double a = vProd(p-r, q-r);
+   double b = vProd(p-s, q-s);
+   double c = vProd(r-p, s-p);
+   double d = vProd(r-q, s-q);
+
+   if (a*b < 0 && c*d < 0) return true;
+
+   if (NAO(a) && eProd(p-r, q-r)<= 0) return true;
+   if (NAO(b) && eProd(p-s, q-s)<= 0) return true;
+   if (NAO(c) && eProd(r-p, s-p)<= 0) return true;
+   if (NAO(d) && eProd(r-q, s-q)<= 0) return true;
 
     return false;
 }
@@ -221,3 +237,14 @@ void KDTree::limpa(NO* no)
 }
 
 bool operator<(const SORTEADOR& s1, const SORTEADOR& s2){ return s1.val < s2.val; }
+
+double KDTree::vProd(QPointF p1, QPointF p2)
+{
+    return (p1.x() * p2.y() - p1.y() * p2.x());
+}
+
+double KDTree::eProd(QPointF p1, QPointF p2)
+{
+    return (p1.x() * p2.x() + p1.y() * p2.y());
+}
+

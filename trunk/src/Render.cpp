@@ -32,8 +32,8 @@ Render::Render(int w, int h, CommandQueue *c) {
     selecionadoScreen.setColor(QColor(0,128,128,128));
     selecionadoScreen.setColor(QColor(255,0,0,128));
     selecionadoScreen.setWidth(10);
-    visinhoScreen.setColor(QColor(0,255,0,128));
-    visinhoScreen.setWidth(10);
+    vizinhoScreen.setColor(QColor(0,255,0,128));
+    vizinhoScreen.setWidth(10);
     faceExternaBack.setColor(corFaceExt);
     arestaGrossaBack.setColor(corArestaGrossa);
     verticeGrossoBack.setColor(corVerticeGrosso);
@@ -178,7 +178,7 @@ void Render::atualizaScreen(void)
     screen = new QImage(screenW, screenH, QImage::Format_ARGB32_Premultiplied);
     p.begin(screen);
     p.setCompositionMode(QPainter::CompositionMode_Source);
-    //p.drawImage(0,0, *backBuffer);//debug
+    p.drawImage(0,0, *backBuffer);//debug
     p.drawImage(0,0, buffer->copy(ponto->x(),ponto->y(),screenW, screenH));
     p.setCompositionMode(QPainter::CompositionMode_SourceOver);
     p.drawImage(0,0, frontBuffer->copy(ponto->x(),ponto->y(),screenW, screenH));
@@ -189,7 +189,7 @@ void Render::atualizaScreen(void)
 void Render::incX()
 {
     qDebug() << "incX";
-    if(ponto->x() + INCPOS + screenW < buffer->width())
+    if(ponto->x() + INCPOS + screenW/2 < buffer->width())
     {
         qDebug() << "Posso";
         ponto->setX(ponto->x() + INCPOS);
@@ -207,7 +207,7 @@ void Render::decX()
 void Render::incY()
 {
     qDebug() << "incY";
-    if(ponto->y() + INCPOS + screenH < buffer->height())
+    if(ponto->y() + INCPOS + screenH/2 < buffer->height())
         ponto->setY(ponto->y() + INCPOS);
 }
 void Render::decY()
@@ -278,6 +278,7 @@ QPoint Render::transforma(const QPointF &in)
     QPoint p(qRound(x), qRound(y));
     return p;
 }
+
 QPointF Render::destransforma(const QPoint &in)
 {
     double xwmax, xwmin, ywmax, ywmin;
@@ -421,25 +422,25 @@ void Render::renderizaFaces()
 
     if(vsel != NULL)
     {
-        renderizaFace(partida, visinhoScreen);
+        renderizaFace(partida, vizinhoScreen);
         for(it = partida->v_begin(); it != partida->v_end(); ++it)
         {
-            renderizaFace(&it, visinhoScreen);
+            renderizaFace(&it, vizinhoScreen);
         }
     }
 
     if(hsel != NULL)
     {
-        renderizaFace(partida, visinhoScreen);
-        renderizaFace(partida->getTwin(), visinhoScreen);
+        renderizaFace(partida, vizinhoScreen);
+        renderizaFace(partida->getTwin(), vizinhoScreen);
     }
 
     if(fsel != NULL)
     {
-        renderizaFace(partida->getTwin(), visinhoScreen);
+        renderizaFace(partida->getTwin(), vizinhoScreen);
         for(it = partida->f_begin(); it != partida->f_end(); ++it)
         {
-            renderizaFace(it->getTwin(), visinhoScreen);
+            renderizaFace(it->getTwin(), vizinhoScreen);
         }
     }
 }
@@ -451,7 +452,7 @@ void Render::renderizaArestas()
     HalfEdge *partida;
     HalfEdge::iterator it;
 
-    buff.setPen(visinhoScreen);
+    buff.setPen(vizinhoScreen);
 
     if(vsel != NULL)
         partida = vsel->getEdge();
@@ -493,7 +494,7 @@ void Render::renderizaVertices()
     HalfEdge *partida;
     HalfEdge::iterator it;
 
-    buff.setPen(visinhoScreen);
+    buff.setPen(vizinhoScreen);
 
     if(vsel != NULL)
         partida = vsel->getEdge();
@@ -568,8 +569,8 @@ void Render::renderizaFace(HalfEdge *h, QPen pen)
     if(interface.isExterna(h->getFace()))
         return;
 
-    if(pen == visinhoScreen)
-        qDebug() << "pintando face com visinhoScreen";
+    if(pen == vizinhoScreen)
+        qDebug() << "pintando face com vizinhoScreen";
     else if(pen == selecionadoScreen)
         qDebug() << "pintando face com seleciodoScreen";
 
@@ -610,6 +611,8 @@ void Render::arestaSelecionada()
 
     p.setPen(selecionadoScreen);
     p.drawLine(transforma(hsel->getOrigem()->getPoint()), transforma(hsel->getDestino()->getPoint()));
+
+    qDebug() << "Desenhar de " << transforma(hsel->getOrigem()->getPoint()) << "a " << transforma(hsel->getDestino()->getPoint()) << "!";
 
 }
 void Render::faceSelecionada()
