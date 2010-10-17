@@ -11,19 +11,21 @@ class Vertex : public QObject
     Q_OBJECT
 public:
     Vertex();
-    Vertex(QPoint p);
+    Vertex(QPointF p);
 
     bool operator==( const Vertex &v2)const;
     bool operator< (Vertex *v)const;
     void setEdge(HalfEdge *hEdge);
-    void setPoint(QPoint p);
-    QPoint getPoint(void) const;
+    void setPoint(QPointF p);
+    QPointF getPoint(void) const;
     HalfEdge* getEdge(void);
 
    private:
-    QPoint p;
+    QPointF p;
     HalfEdge *hEdge;
 
 };
+
+inline bool operator< (const QPointF& p1, const QPointF& p2);
 
 #endif // VERTEX_H

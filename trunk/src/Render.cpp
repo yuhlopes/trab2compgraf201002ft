@@ -126,7 +126,7 @@ void Render::updateScreen(int w, int h)
 
 void Render::recebeArquivo(const QString &filename)
 {
-    QVector<QPoint> tmp;
+    QVector<QPointF> tmp;
 
     if(sel != NULL)
     {
@@ -248,10 +248,10 @@ void Render::decZoom()
     reiniciaBuffers(screenW * zoom, screenH * zoom);
 }
 
-QPoint Render::transforma(const QPoint &in)
+QPoint Render::transforma(const QPointF &in)
 {
-    int xwmax, xwmin, ywmax, ywmin;
-    int xmax, xmin, ymax, ymin;
+    double xwmax, xwmin, ywmax, ywmin;
+    double xmax, xmin, ymax, ymin;
     double sx,sy;
 
     xmin = buffer->width() * MARGEM;
@@ -275,13 +275,13 @@ QPoint Render::transforma(const QPoint &in)
     int x = sx*in.x() - sx*xwmin + xmin + 0.5;
     int y = sy*in.y() - sy*ywmin + ymin + 0.5;
 
-    QPoint p(x, y);
+    QPoint p(qRound(x), qRound(y));
     return p;
 }
-QPoint Render::destransforma(const QPoint &in)
+QPointF Render::destransforma(const QPoint &in)
 {
-    int xwmax, xwmin, ywmax, ywmin;
-    int xmax, xmin, ymax, ymin;
+    double xwmax, xwmin, ywmax, ywmin;
+    double xmax, xmin, ymax, ymin;
     double sx,sy;
 
     xwmin = buffer->width() * MARGEM;
@@ -305,14 +305,14 @@ QPoint Render::destransforma(const QPoint &in)
     int x = sx*in.x() - sx*xwmin + xmin + 0.5;
     int y = sy*in.y() - sy*ywmin + ymin + 0.5;
 
-    QPoint p(x, y);
+    QPointF p(x, y);
     return p;
 }
 
 void Render::renderiza(void)
 {
     QPoint p1, p2;
-    QList<QPair<QPoint,QPoint> > lista = interface.getTodasArestas();
+    QList<QPair<QPointF,QPointF> > lista = interface.getTodasArestas();
     QPainter buff(buffer);
     QPainter back(backBuffer);
 
@@ -342,13 +342,14 @@ void Render::click(void)
     HalfEdge* h = NULL;
     Face *f = NULL;
     HalfEdge* t = NULL;
-    QPoint p1;
+    QPointF p1;
+    QPoint p2;
 
-    p1.setX(sel->x() + ponto->x());
-    p1.setY(sel->y() + ponto->y());
+    p2.setX(sel->x() + ponto->x());
+    p2.setY(sel->y() + ponto->y());
 
-    QRgb rgb = backBuffer->pixel(p1);
-    p1 = destransforma(p1);
+    QRgb rgb = backBuffer->pixel(p2);
+    p1 = destransforma(p2);
 
     if(rgb == corVerticeGrosso)
     {
@@ -420,28 +421,29 @@ void Render::renderizaFaces()
 
     if(vsel != NULL)
     {
-        renderizaFace(partida, &visinhoScreen);
+        renderizaFace(partida, visinhoScreen);
         for(it = partida->v_begin(); it != partida->v_end(); ++it)
         {
-            renderizaFace(&it, &visinhoScreen);
+            renderizaFace(&it, visinhoScreen);
         }
     }
 
     if(hsel != NULL)
     {
-        renderizaFace(partida, &visinhoScreen);
-        renderizaFace(partida->getTwin(), &visinhoScreen);
+        renderizaFace(partida, visinhoScreen);
+        renderizaFace(partida->getTwin(), visinhoScreen);
     }
 
     if(fsel != NULL)
     {
-        renderizaFace(partida, &visinhoScreen);
+        renderizaFace(partida->getTwin(), visinhoScreen);
         for(it = partida->f_begin(); it != partida->f_end(); ++it)
         {
-            renderizaFace(&it, &visinhoScreen);
+            renderizaFace(it->getTwin(), visinhoScreen);
         }
     }
 }
+
 void Render::renderizaArestas()
 {
     QPainter buff(frontBuffer);
@@ -556,7 +558,7 @@ void Render::reiniciaBuffers(int w, int h)
     renderizaFront();
 }
 
-void Render::renderizaFace(HalfEdge *h, QPen *pen)
+void Render::renderizaFace(HalfEdge *h, QPen pen)
 {
     QPainter buff(frontBuffer);
     QPainterPath *path;
@@ -566,7 +568,12 @@ void Render::renderizaFace(HalfEdge *h, QPen *pen)
     if(interface.isExterna(h->getFace()))
         return;
 
-    buff.setPen(*pen);
+    if(pen == visinhoScreen)
+        qDebug() << "pintando face com visinhoScreen";
+    else if(pen == selecionadoScreen)
+        qDebug() << "pintando face com seleciodoScreen";
+
+    buff.setPen(pen);
 
     path = new QPainterPath();
     p = transforma(h->getOrigem()->getPoint());
@@ -579,7 +586,7 @@ void Render::renderizaFace(HalfEdge *h, QPen *pen)
     p = transforma(h->getOrigem()->getPoint());
     path->lineTo(p.x(),p.y());
 
-    buff.fillPath(*path,visinhoScreen.brush());
+    buff.fillPath(*path,pen.brush());
     delete path;
 }
 
@@ -610,5 +617,5 @@ void Render::faceSelecionada()
     if(fsel == NULL)
         return;
 
-    renderizaFace(fsel->getOuterComp(), &selecionadoScreen);
+    renderizaFace(fsel->getOuterComp(), selecionadoScreen);
 }

@@ -1,14 +1,19 @@
 #include "KDTree.h"
 #include <QtAlgorithms>
 
-bool x;
-
 KDTree::KDTree(const QList<HalfEdge *> &list, QRectF limite)
 {
     if(list.size() > 0)
     {
         raiz = divide(new QList<HalfEdge *>(list), limite, true);
-    }
+    }else
+        raiz = NULL;
+}
+
+KDTree::~KDTree()
+{
+    if(raiz != NULL)
+        limpa(raiz);
 }
 
 NO* KDTree::divide(QList<HalfEdge *> *list, QRectF limite, bool primeiro)
@@ -20,14 +25,21 @@ NO* KDTree::divide(QList<HalfEdge *> *list, QRectF limite, bool primeiro)
     QList<HalfEdge *> *esq = new QList<HalfEdge *>();
     QList<HalfEdge *> *dir = new QList<HalfEdge *>();
 
+    qDebug() << "Check 1";
+
     v = pivoteia(list, limite, primeiro, esq, dir);
 
-    if(esq->size() < 0 || dir->size() < 0)
+    qDebug() << "Check 2";
+
+    if(esq->size() < 0 || dir->size() < 0 || esq->size() == list->size() || dir->size() == list->size())
     {
         delete esq;
         delete dir;
+        qDebug() << "Check 3";
         return NULL;
     }
+
+    qDebug() << "Check 4";
 
     no = new NO();
 
@@ -43,25 +55,36 @@ NO* KDTree::divide(QList<HalfEdge *> *list, QRectF limite, bool primeiro)
         retD.setBottom(v);
     }
 
+    qDebug() << "Check 5";
+
     no->esq = divide(esq, retE, !primeiro);
+    qDebug() << "Check 6";
     no->dir = divide(dir, retD, !primeiro);
+    qDebug() << "Check 7";
 
     if(no->esq == NULL && no->dir == NULL)
     {
         delete esq;
         delete dir;
         no->lista = list;
+        qDebug() << "Check 8";
     }else if(no->esq == NULL)
     {
         delete list;
         no->lista = esq;
+        qDebug() << "Check 8";
     }else if(no->dir == NULL)
     {
         delete list;
         no->lista = dir;
+        qDebug() << "Check 10";
     }else
+    {
         delete list;
+        qDebug() << "Check 11";
+    }
 
+    qDebug() << "Check 12";
     return no;
 
 }
@@ -73,12 +96,30 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
     QPoint p1, p2;
     HalfEdge *p;
     HalfEdge *i;
+    QList<SORTEADOR> *l = new QList<SORTEADOR>();
+    SORTEADOR sort;
 
-    x = primeiro;
-    qSort(list->begin(), list->end());
+    qDebug() << "Check P1";
+    for(int i = 0; i < list->size(); ++i)
+    {
+        sort.ind = i;
+        if(primeiro)
+            sort.val = list->operator [](i)->getOrigem()->getPoint().x();
+        else
+            sort.val = list->operator [](i)->getOrigem()->getPoint().y();
+        l->push_back(sort);
+        qDebug() << "Check P2";
+    }
+    qDebug() << "Check P3";
+    qSort(*l);
+    qDebug() << "Check P4";
 
-    piv = list->size()/2 -1;
-    p = list->operator [](piv);
+    piv = list->size()/2;
+    int j = l->operator [](piv).ind;
+    p = list->operator [](j);
+    l->clear();
+    delete l;
+    qDebug() << "Check P5";
 
     if(primeiro)
     {
@@ -93,11 +134,12 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
         p1.setX(limite.left());
         p2.setX(limite.right());
     }
+    qDebug() << "Check P6";
 
     for(it = 0; it < list->size(); ++it)
     {
         i = list->operator [](it);
-        if(cruza(p1,p2, i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
+        if(cruza(QLineF(p1,p2), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint())))
         {
             men->push_back(i);
             mai->push_back(i);
@@ -114,7 +156,9 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
             else
                 mai->push_back(i);
         }
+        qDebug() << "Check P7";
     }
+    qDebug() << "Check P8";
 
     if(primeiro)
         return p->getOrigem()->getPoint().x();
@@ -122,35 +166,14 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
         return p->getOrigem()->getPoint().y();
 
 }
-bool KDTree::cruza(QPointF v1, QPointF v2 , QPointF u1, QPointF u2)
+bool KDTree::cruza(const QLineF &v, const QLineF &u)
 {
-    double a1, b1, a2, b2, xi, yi;
+    QPointF p;
 
-    b1 = (v2.y() - v1.y())/(v2.x() - v1.x());
-    b2 = (u2.y() - u1.y())/(u2.x() - u1.x());
-
-    a1 = v1.y()-b1*v1.x();
-    a2 = u1.y()-b2*u1.x();
-
-    xi = - (a1-a2)/(b1-b2);
-    yi = a1+b1*xi;
-
-    if((v1.x()-xi)*(xi-v2.x()) >= 0 && (u1.x()-xi)*(xi-u2.x()) >= 0 && (v1.y()-yi)*(yi-v2.y()) >= 0 && (u1.y()-yi)*(yi-u2.y()) >= 0)
+    if(v.intersect(u,&p) == QLineF::BoundedIntersection)
         return true;
 
     return false;
-}
-
-bool operator<(HalfEdge &e1, HalfEdge& e2)
-{
-
-       if(x)
-            return e1.getOrigem()->getPoint().x() < e1.getOrigem()->getPoint().x();
-        else
-            return e1.getOrigem()->getPoint().y() < e1.getOrigem()->getPoint().y();
-
-    return false;
-
 }
 
 QList<HalfEdge *>* KDTree::find(const QPointF &p)
@@ -181,3 +204,20 @@ QList<HalfEdge *>* KDTree::busca(const QPointF &p, NO* no,bool primeiro)
     }
 
 }
+
+void KDTree::limpa(NO* no)
+{
+    if(no->esq != NULL)
+        limpa(no->esq);
+    if(no->dir != NULL)
+        limpa(no->dir);
+
+    if(no->lista != NULL)
+    {
+        delete no->lista;
+    }
+
+    delete no;
+}
+
+bool operator<(const SORTEADOR& s1, const SORTEADOR& s2){ return s1.val < s2.val; }

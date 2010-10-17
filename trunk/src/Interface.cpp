@@ -1,6 +1,8 @@
 #include "Interface.h"
 #include <QDebug>
 #include <math.h>
+#include <QLineF>
+#include <QPolygonF>
 
 Interface::Interface()
 {
@@ -11,26 +13,17 @@ Interface::Interface()
     faceExterna = NULL;
 }
 
-inline bool operator< (const QPoint& p1, const QPoint& p2)
-{
- if (p1.x() == p2.x())
-        return (p1.y() < p2.y());
-
-    return (p1.x() < p2.x());
-
-}
-
 bool Interface::isExterna(Face* f)
 {
     return (f == faceExterna);
 }
 
-QList<QPair<QPoint, QPoint> > Interface::getTodasArestas()
+QList<QPair<QPointF, QPointF> > Interface::getTodasArestas()
 {
     return map.keys();
 }
 
-void Interface::addFace(QVector<QPoint> in)
+void Interface::addFace(QVector<QPointF> in)
 {
     Face *f = new Face();
     HalfEdge *ant = NULL;
@@ -83,9 +76,9 @@ void Interface::addFace(QVector<QPoint> in)
     faces.push_back(f);
 }
 
-Vertex* Interface::addVertex(QPoint p)
+Vertex* Interface::addVertex(QPointF p)
 {
-    QMap<QPoint,Vertex*>::iterator it;
+    QMap<QPointF,Vertex*>::iterator it;
 
     it = vertices.find(p);
     if (it == vertices.end())
@@ -99,9 +92,9 @@ Vertex* Interface::addVertex(QPoint p)
     return it.value();
 }
 
-HalfEdge* Interface::findTwin(QPoint u, QPoint v)
+HalfEdge* Interface::findTwin(QPointF u, QPointF v)
 {
-    QMap<QPair<QPoint, QPoint>, HalfEdge*>::iterator it;
+    QMap<QPair<QPointF, QPointF>, HalfEdge*>::iterator it;
 
     it = map.find(qMakePair(u,v));
     if(it != map.end())
@@ -165,34 +158,105 @@ void Interface::addExtEdges(void)
             adicionaface(lista[i], faceExterna);
         }
     }
+
+    kdt = new KDTree(map.values(),QRectF(minX,minY,minX+maxX, minY+maxY));
 }
 
-HalfEdge* Interface::getArestaNear(QPoint p)
+HalfEdge* Interface::getArestaNear(QPointF p)
 {
-    return NULL;
+    QList<HalfEdge *> *lista = kdt->find(p);
+    double dist;
+    double mindist = INF;
+    HalfEdge *min;
+    HalfEdge *it;
+    QLineF v,u;
+    QPointF inter;
+    QLineF::IntersectType intertype;
+
+    // muito errado!!!!
+
+    for(int i = 0; i < lista->size(); ++i)
+    {
+        it = lista->operator [](i);
+
+        v.setP1(it->getOrigem()->getPoint());
+        v.setP2(it->getDestino()->getPoint());
+
+        u = v.normalVector();
+        u.translate(p);
+
+        intertype = v.intersect(u,&inter);
+        if((v.p1().x()-inter.x())*(inter.x()-v.p2().x()) >= 0 && (v.p1().y()-inter.y())*(inter.y()-v.p2().y()) >= 0)
+        {
+            dist = sqrt((p.x()-inter.x())*(p.x()-inter.x()) + (p.y()-inter.y())*(p.y()-inter.y()));
+        }else
+        {
+            double tmp = sqrt((p.x()-v.p1().x())*(p.x()-v.p1().x()) + (p.y()-v.p1().y())*(p.y()-v.p1().y()));
+                  dist = sqrt((p.x()-v.p2().x())*(p.x()-v.p2().x()) + (p.y()-v.p2().y())*(p.y()-v.p2().y()));
+            if(tmp < dist)
+                dist = tmp;
+        }
+
+        if(dist < mindist)
+        {
+            mindist = dist;
+            min = it;
+        }
+    }
+
+    return min;
 }
-Face* Interface::getFaceNear(QPoint p)
+Face* Interface::getFaceNear(QPointF p)
 {
-    return NULL;
+    HalfEdge *min = getArestaNear(p);
+
+    if(dentroFace(min,p))
+        return min->getFace();
+
+    return min->getTwin()->getFace();
 }
-Vertex* Interface::getVerticeNear(QPoint p)
+Vertex* Interface::getVerticeNear(QPointF p)
 {
-    QMap<QPoint,Vertex*>::const_iterator it;
+    QList<HalfEdge *> *lista = kdt->find(p);
     Vertex* menor = NULL;
     double distMenor = INF;
     double dist;
-    QPoint ponto;
+    QPointF ponto;
 
-    for(it = vertices.begin(); it != vertices.end(); ++it)
+    for(int it = 0; it < lista->size(); ++it)
     {
-        ponto = it.value()->getPoint();
+        ponto = lista->operator [](it)->getOrigem()->getPoint();
         dist = sqrt((p.x()-ponto.x())*(p.x()-ponto.x()) + (p.y()-ponto.y())*(p.y()-ponto.y()));
         if(dist < distMenor)
         {
             distMenor = dist;
-            menor = it.value();
+            menor = lista->operator [](it)->getOrigem();
+        }
+
+        ponto = lista->operator [](it)->getDestino()->getPoint();
+        dist = sqrt((p.x()-ponto.x())*(p.x()-ponto.x()) + (p.y()-ponto.y())*(p.y()-ponto.y()));
+        if(dist < distMenor)
+        {
+            distMenor = dist;
+            menor = lista->operator [](it)->getDestino();
         }
     }
 
     return menor;
+}
+
+bool Interface::dentroFace(HalfEdge* h, QPointF p)
+{
+    HalfEdge::iterator it;
+    QVector<QPointF> list;
+
+    list.push_back(h->getOrigem()->getPoint());
+    for(it = h->f_begin(); it != h->f_end(); ++it)
+    {
+        list.push_back(it->getOrigem()->getPoint());
+    }
+
+    QPolygonF po(list);
+
+    return po.containsPoint(p, Qt::OddEvenFill);
 }

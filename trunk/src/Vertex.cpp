@@ -1,10 +1,19 @@
 #include "Vertex.h"
 
+inline bool operator< (const QPointF& p1, const QPointF& p2)
+{
+ if (p1.x() == p2.x())
+        return (p1.y() < p2.y());
+
+    return (p1.x() < p2.x());
+
+}
+
 Vertex::Vertex()
 {
 }
 
-Vertex::Vertex(QPoint p)
+Vertex::Vertex(QPointF p)
 {
     this->p = p;
 }
@@ -16,13 +25,10 @@ bool Vertex::operator== ( const Vertex &v2)const
 
 bool Vertex::operator <(Vertex *v)const
 {
-    if (this->getPoint().x() == v->getPoint().x())
-        return (this->getPoint().y() - v->getPoint().y());
-
-    return (this->getPoint().x() - v->getPoint().x());
+    return this->p < v->getPoint();
 }
 
-void Vertex::setPoint(QPoint p)
+void Vertex::setPoint(QPointF p)
 {
     this->p = p;
 }
@@ -32,7 +38,7 @@ void Vertex::setEdge(HalfEdge *hEdge)
     this->hEdge = hEdge;
 }
 
-QPoint Vertex::getPoint(void) const
+QPointF Vertex::getPoint(void) const
 {
     return p;
 }

@@ -17,7 +17,7 @@ PlyParser::PlyParser(const QString& filename)
     QVector<int> tmp;
 	QFile file(filename);
 	QString word;
-	QPoint p;
+        QPointF p;
 
 	file.open(QIODevice::ReadOnly);
 
@@ -94,10 +94,10 @@ PlyParser::PlyParser(const QString& filename)
 	                linha = new QTextStream(&s, QIODevice::ReadOnly);
 		            *linha >> val;
 //		            qDebug() << "X: " << val;
- 		            p.setX(qRound(val));
+                            p.setX(val);
 		            *linha >> val;
 //   		            qDebug() << "Y: " << val;
-		            p.setY(qRound(val));
+                            p.setY(val);
 		            pontos.push_back(p);
 		        }
 		        estado = 5;
@@ -130,9 +130,9 @@ PlyParser::PlyParser(const QString& filename)
 //        qDebug() << "NFaces: " << nFaces;
 }
 
-QVector<QPoint> PlyParser::proximo()
+QVector<QPointF> PlyParser::proximo()
 {
-    QVector<QPoint> ret;
+    QVector<QPointF> ret;
     
     if(indice >= nFaces)
         return ret;

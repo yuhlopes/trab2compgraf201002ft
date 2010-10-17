@@ -11,7 +11,7 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
-#include <QPoint>
+#include <QPointF>
 
 
 class PlyParser : public QObject
@@ -20,12 +20,12 @@ class PlyParser : public QObject
 public:
     PlyParser(const QString&);
     
-    QVector<QPoint> proximo();
+    QVector<QPointF> proximo();
     
 private:
     int nVertices;
     int nFaces;
-    QVector<QPoint> pontos;
+    QVector<QPointF> pontos;
     QVector<QVector<int> > faces;
     int indice;
         
