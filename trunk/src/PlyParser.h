@@ -21,6 +21,7 @@ public:
     PlyParser(const QString&);
     
     QVector<QPointF> proximo();
+    int getNFaces(void);
     
 private:
     int nVertices;

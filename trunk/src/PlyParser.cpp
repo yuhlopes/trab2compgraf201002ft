@@ -27,11 +27,14 @@ PlyParser::PlyParser(const QString& filename)
 	linha = new QTextStream(&s, QIODevice::ReadOnly);
 	while(!sai)
 	{
+
+   //         qDebug() << "LEU " << s << "!";
+
 		switch(estado)
 		{
 		    case 0: // primeira palavra
 		        *linha >> word;
-//		        qDebug() << "word:" << word;
+                        qDebug() << "word:" << word;
                         if(word == "comment"  || word == "format" || word == "property" || word == "ply" || word == "obj_info")
 		            estado = 3;
 		        else if(word == "element" )
@@ -50,7 +53,7 @@ PlyParser::PlyParser(const QString& filename)
 		       
 		     case 1: // configs de element
 		         *linha >> word;
-//		         qDebug() << "word:" << word;
+                         qDebug() << "word:" << word;
 		         if(word == "vertex")
 		         {
 		            *linha >> nVertices;
@@ -68,7 +71,7 @@ PlyParser::PlyParser(const QString& filename)
 		        
 		     case 2:
 		        *linha >> word;
-//   		         qDebug() << "word:" << word;
+                         qDebug() << "word:" << word;
                         if(word == "}")
 		            estado = 0;
 		        else if(word == NULL){
@@ -83,7 +86,7 @@ PlyParser::PlyParser(const QString& filename)
    		        s = stream.readLine();
                         linha = new QTextStream(&s, QIODevice::ReadOnly);
 		        estado = 0;
-//                qDebug() << "fim de linha";
+                 qDebug() << "fim de linha";
 		        break;
 		        
 		     case 4:
@@ -93,10 +96,10 @@ PlyParser::PlyParser(const QString& filename)
     		        s = stream.readLine();
 	                linha = new QTextStream(&s, QIODevice::ReadOnly);
 		            *linha >> val;
-//		            qDebug() << "X: " << val;
+                            qDebug() << "X: " << val;
                             p.setX(val);
 		            *linha >> val;
-//   		            qDebug() << "Y: " << val;
+                            qDebug() << "Y: " << val;
                             p.setY(val);
 		            pontos.push_back(p);
 		        }
@@ -148,4 +151,9 @@ QVector<QPointF> PlyParser::proximo()
     indice++;
     
     return ret;   
+}
+
+int PlyParser::getNFaces(void)
+{
+    return nFaces;
 }
