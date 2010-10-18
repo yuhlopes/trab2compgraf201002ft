@@ -232,26 +232,22 @@ HalfEdge* Interface::getArestaNear(QPointF p)
 
        // qDebug() << "dist2 " << dist2 << "min " << min;
 
-        if (p1.x() == p2.x() &&  MIN(p1.y(),p2.y()) <= p.y() && p.y() <= MAX(p1.y(),p2.y()) )
-        {
-            realdist2 = (p1.x()-p.x())*(p1.x()-p.x());
-        }
-        else if ( p1.y() == p2.y() &&  MIN(p1.x(),p2.x()) <= p.x() && p.x() <= MAX(p1.x(),p2.x()))
-        {
-            realdist2 = (p1.y()-p.y())*(p1.y()-p.y());
-        }
-        else if  ( MIN(p1.x(),p2.x()) <= p.x() && p.x() <= MAX(p1.x(),p2.x()) &&
-              MIN(p1.y(),p2.y()) <= p.y() && p.y() <= MAX(p1.y(),p2.y()) )
-        {
-            realdist2 = dist2;
-        }
-        else
+        QPointF dir = (p2 - p1)/sqrt(mod2);
+
+        QPointF AP = p - p1;
+        QPointF AB = p2 - p1;
+
+        double proj = eProd(AP,dir);
+
+        if (proj < 0 || proj >= sqrt(mod2))
         {
             double dist2p1 = (p1.x()-p.x())*(p1.x()-p.x()) + (p1.y()-p.y())*(p1.y()-p.y());
             double dist2p2 = (p2.x()-p.x())*(p2.x()-p.x()) + (p2.y()-p.y())*(p2.y()-p.y());
 
             realdist2 = MIN(dist2p1,dist2p2);
         }
+        else
+            realdist2 = dist2;
 
 
         if (realdist2 < min)
