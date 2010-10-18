@@ -44,7 +44,8 @@ private:
         QPointF destransforma(const QPoint &);
         void renderiza(void);
         void renderizaFaces(void);
-        void renderizaFace(HalfEdge *h, QPen pen);
+        void renderizaFace(HalfEdge *h,QImage*b ,QPen pen);
+        void renderizaFaceExterna(QPen*);
         void renderizaArestas(void);
         void renderizaVertices(void);
         void renderizaFront(void);
@@ -54,6 +55,9 @@ private:
         void verticeSelecionado(void);
         void arestaSelecionada(void);
         void faceSelecionada(void);
+        bool dentroFace(HalfEdge* h, QPointF p);
+        void renderizaComponente(HalfEdge *h,QImage* b,QPen pen);
+        bool componenteFaceUnica(HalfEdge *h);
 
         Vertex* vsel;
         HalfEdge* hsel;
@@ -86,5 +90,7 @@ private:
         QPen arestaGrossaBack;
         QPen verticeGrossoBack;        
 };
+
+uint qHash(const QPointF&);
 
 #endif

@@ -186,6 +186,7 @@ void Interface::addExtEdges(void)
         {
  //           qDebug() << "twin: NULL - adicionar na face externa";
             adicionaface(lista[i], faceExterna);
+            componentesFaceExterna.push_back(lista[i]);
         }
  /*       else
             qDebug() << "twin: " << lista[i]->getTwin()->getOrigem()->getPoint() << " -> " << lista[i]->getTwin()->getDestino()->getPoint();
