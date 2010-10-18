@@ -403,8 +403,9 @@ void Render::renderizaFront(void)
     p.end();
 
     if(mostraFace)
+    {
         renderizaFaces();
-
+    }
     if(mostraAresta)
         renderizaArestas();
 

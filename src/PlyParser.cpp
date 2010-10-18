@@ -30,7 +30,7 @@ PlyParser::PlyParser(const QString& filename)
 	while(!sai)
 	{
 
-   //         qDebug() << "LEU " << s << "!";
+            qDebug() << "LEU " << s << "!";
 
 		switch(estado)
 		{
