@@ -10,13 +10,13 @@ class Face : public QObject
     Q_OBJECT
 public:
     Face();
+    virtual ~Face();
 
 void setOuterComp(HalfEdge *e);
 HalfEdge* getOuterComp(void);
 
 private:
     HalfEdge *outerComp;
-    QVector<HalfEdge> innerComps;
 };
 
 

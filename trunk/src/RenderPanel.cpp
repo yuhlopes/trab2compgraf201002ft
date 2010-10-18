@@ -43,7 +43,6 @@ void RenderPanel::mouseReleaseEvent(QMouseEvent *event)
 
     if(event->x() >= 0 && event->y() >=0 && event->x() < fundolb->width() && event->y() < fundolb->height())
     {
-        qDebug() << "mouseReleaseEvent: x=" << event->x() << ", y=" << event->y();
         cmdq->produz(SELECT,event->x(), event->y());
     }
 }

@@ -40,7 +40,6 @@ private:
 
     double vProd(QPointF p1, QPointF p2);
     double eProd(QPointF p1, QPointF p2);
-    bool aEsquerda(HalfEdge e1, HalfEdge e2);
 
 public:
     KDTree(const QList<HalfEdge *> &list, QRectF limite);

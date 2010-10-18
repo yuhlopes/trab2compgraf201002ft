@@ -8,7 +8,7 @@
 #ifndef _COMMANDQUEUE_H
 #define	_COMMANDQUEUE_H
 
-#define MAXCOMMANDS  20
+#define MAXCOMMANDS  100
 
 #include <QObject>
 #include <QMutex>

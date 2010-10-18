@@ -19,6 +19,7 @@ class PlyParser : public QObject
     Q_OBJECT
 public:
     PlyParser(const QString&);
+    virtual ~PlyParser();
     
     QVector<QPointF> proximo();
     int getNFaces(void);

@@ -9,6 +9,10 @@ HalfEdge::HalfEdge()
     this->origem = NULL;
 }
 
+HalfEdge::~HalfEdge()
+{
+}
+
 void HalfEdge::setOrigem(Vertex *v)
 {
     this->origem = v;
@@ -91,11 +95,6 @@ bool HalfEdge::operator!=(HalfEdge& e)
 {
     return !(this->operator ==(e));
 }
-
-//HalfEdge* HalfEdge::self(void)
-//{
-//    return this;
-//}
 
 HalfEdge::iterator HalfEdge::v_begin()
 {

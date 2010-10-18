@@ -13,6 +13,10 @@ Vertex::Vertex()
 {
 }
 
+Vertex::~Vertex()
+{
+}
+
 Vertex::Vertex(QPointF p)
 {
     this->p = p;
