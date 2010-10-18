@@ -201,7 +201,7 @@ void Interface::addExtEdges(void)
 
 HalfEdge* Interface::getArestaNear(QPointF p)
 {
-    QList<HalfEdge *> *lista = kdt->find(p);
+    QList<HalfEdge *> *lista = new QList<HalfEdge *>(map.values());//kdt->find(p);
 
     HalfEdge *e, *best = NULL;
     QPointF p1, p2;
@@ -254,7 +254,7 @@ Face* Interface::getFaceNear(QPointF p)
 
 Vertex* Interface::getVerticeNear(QPointF p)
 {
-    QList<HalfEdge *> *lista = kdt->find(p);
+    QList<HalfEdge *> *lista = new QList<HalfEdge *>(map.values()); //kdt->find(p);
     Vertex* menor = NULL;
     double distMenor = INF;
     double dist;

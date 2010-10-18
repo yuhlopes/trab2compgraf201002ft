@@ -271,16 +271,16 @@ QPoint Render::transforma(const QPointF &in)
     ywmin = interface.getMinY();
     ywmax = interface.getMaxY();
 
-    sx = (xmax - xmin + 0.0)/(xwmax - xwmin + 0.0);
-    sy = (ymax - ymin + 0.0)/(ywmax - ywmin + 0.0);
+    sx = (xmax - xmin )/(xwmax - xwmin );
+    sy = (ymax - ymin )/(ywmax - ywmin );
 
     if(sx < sy)
         sy = sx;
     else
         sx = sy;
 
-    int x = sx*in.x() - sx*xwmin + xmin + 0.5;
-    int y = sy*in.y() - sy*ywmin + ymin + 0.5;
+    double x = sx*in.x() - sx*xwmin + xmin;
+    double y = sy*in.y() - sy*ywmin + ymin;
 
     QPoint p(qRound(x), qRound(y));
     return p;
@@ -302,16 +302,16 @@ QPointF Render::destransforma(const QPoint &in)
     ymin = interface.getMinY();
     ymax = interface.getMaxY();
 
-    sx = (xmax - xmin + 0.0)/(xwmax - xwmin + 0.0);
-    sy = (ymax - ymin + 0.0)/(ywmax - ywmin + 0.0);
+    sx = (xmax - xmin )/(xwmax - xwmin );
+    sy = (ymax - ymin )/(ywmax - ywmin );
 
     if(sx > sy)
         sy = sx;
     else
         sx = sy;
 
-    int x = sx*in.x() - sx*xwmin + xmin + 0.5;
-    int y = sy*in.y() - sy*ywmin + ymin + 0.5;
+    double x = sx*in.x() - sx*xwmin + xmin;
+    double y = sy*in.y() - sy*ywmin + ymin;
 
     QPointF p(x, y);
     return p;
@@ -319,7 +319,7 @@ QPointF Render::destransforma(const QPoint &in)
 
 void Render::renderiza(void)
 {
-    QPoint p1, p2;
+    QPoint p1, p2, t;
     QList<QPair<QPointF,QPointF> > lista = interface.getTodasArestas();
     QPainter buff(buffer);
     QPainter back(backBuffer);
@@ -333,6 +333,10 @@ void Render::renderiza(void)
     {
         p1 = transforma(lista[i].first);
         p2 = transforma(lista[i].second);
+        qDebug() << "Original:" << lista[i].first;
+        qDebug() << "Transformado:" << p1;
+        qDebug() << "Destransformado:" << destransforma(p1);
+
 
         buff.drawLine(p1,p2);
 

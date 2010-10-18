@@ -23,7 +23,9 @@ PlyParser::PlyParser(const QString& filename)
 
 	QTextStream stream(&file);
 	QTextStream *linha;
-	s = stream.readLine();
+        do{
+            s = stream.readLine();
+        }while(semPalavras(s));
 	linha = new QTextStream(&s, QIODevice::ReadOnly);
 	while(!sai)
 	{
@@ -76,14 +78,18 @@ PlyParser::PlyParser(const QString& filename)
 		            estado = 0;
 		        else if(word == NULL){
                             delete linha;
+                            do{
                             s = stream.readLine();
+                         }while(semPalavras(s));
                             linha = new QTextStream(&s, QIODevice::ReadOnly);
 		        }
 		        break;
 		        
 		     case 3:
 		        delete linha;
-   		        s = stream.readLine();
+                        do{
+                            s = stream.readLine();
+                         }while(semPalavras(s));
                         linha = new QTextStream(&s, QIODevice::ReadOnly);
 		        estado = 0;
                  qDebug() << "fim de linha";
@@ -93,8 +99,10 @@ PlyParser::PlyParser(const QString& filename)
 		        for(i = 0; i < nVertices; i++)
 		        {
 	    	        delete linha;
-    		        s = stream.readLine();
-	                linha = new QTextStream(&s, QIODevice::ReadOnly);
+                        do{
+                            s = stream.readLine();
+                         }while(semPalavras(s));
+                            linha = new QTextStream(&s, QIODevice::ReadOnly);
 		            *linha >> val;
                             qDebug() << "X: " << val;
                             p.setX(val);
@@ -109,7 +117,9 @@ PlyParser::PlyParser(const QString& filename)
 		        for(i = 0; i < nFaces; i++)
 		        {
 		            delete linha;
-    		        s = stream.readLine();
+                            do{
+                                s = stream.readLine();
+                            }while(semPalavras(s));
 	                linha = new QTextStream(&s, QIODevice::ReadOnly);
     		        tmp.clear();
     		        *linha >> nPF;
@@ -151,6 +161,12 @@ QVector<QPointF> PlyParser::proximo()
     indice++;
     
     return ret;   
+}
+
+bool PlyParser::semPalavras(QString s)
+{
+    s.replace(QString(" "), QString(""));
+    return s.isEmpty();
 }
 
 int PlyParser::getNFaces(void)
