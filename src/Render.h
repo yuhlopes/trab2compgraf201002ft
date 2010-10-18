@@ -76,7 +76,6 @@ private:
         bool mostraAresta;
         bool mostraFace;
         Interface interface;
-        QMap<QPoint , QPoint> map;
         QPen arestaScreen;
         QPen selecionadoScreen;
         QPen vizinhoScreen;

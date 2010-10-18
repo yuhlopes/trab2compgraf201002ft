@@ -11,6 +11,7 @@ Interface::Interface()
     maxX = -INF;
     maxY = -INF;
     faceExterna = NULL;
+    kdt = NULL;
 }
 
 bool Interface::isExterna(Face* f)
@@ -52,24 +53,19 @@ void Interface::addFace(QVector<QPointF> in)
         if (ant!= NULL)
         {
             ant->setProx(e);
-  //          qDebug() << ant << "->" << e;
         }
 
         e->setTwin(twin);
         if (twin!= NULL)
         {
             twin->setTwin(e);
-  //          qDebug() << "    Twin:" << twin;
         }
 
         ant = e;
     }
- //   qDebug() << "Saiu do for";
 
     first->setAnt(ant);
     ant->setProx(first);
-
- //   qDebug() << ant << "->" << first;
 
     f->setOuterComp(first);
 
@@ -111,6 +107,7 @@ void Interface::adicionaface(HalfEdge* e, Face* f)
     HalfEdge *ant = NULL;
     HalfEdge *nova = NULL;
     HalfEdge *first;
+    bool sai = false;
 
     nova = new HalfEdge();
 
@@ -122,23 +119,21 @@ void Interface::adicionaface(HalfEdge* e, Face* f)
     ant = nova;
     first = nova;
 
-    qDebug() << "Criada twin: " << nova->getOrigem()->getPoint() << " -||";
-
     ori = ori->getProx();
-    while(ori != e)
+    while(true)
     {
-
         while(ori->getTwin() != NULL)
         {
-            if (ori->getTwin()->getProx()!= NULL)  //se não ori sai do while com null
-                ori = ori->getTwin()->getProx();
-            else
+            if(ori == e)
+            {
+                sai = true;
                 break;
+            }
+            ori = ori->getTwin()->getProx();
         }
 
-        if (ori->getTwin() == first) break; //sai do while quando a twin foi a primeira a ser criada (sem prox)
-
-        qDebug() << "Achei s/twin: " << ori->getOrigem()->getPoint() << " -> " << ori->getDestino()->getPoint();
+        if(sai)
+            break;
 
         nova = new HalfEdge();
 
@@ -149,26 +144,13 @@ void Interface::adicionaface(HalfEdge* e, Face* f)
         ant->setAnt(nova);
         nova->setOrigem(ori->getDestino());
 
-         qDebug() << "Criada twin: " << nova->getOrigem()->getPoint() << " -> " << nova->getDestino()->getPoint();
-
         ori = ori->getProx();
 
         ant = nova;
     }
-    qDebug() << "SAIU";
 
     ori->getTwin()->setProx(ant);
     ant->setAnt(ori->getTwin());
-
-    /*
-    qDebug() << "anterior da ultima " << ori->getTwin()->getOrigem()->getPoint();
-    ant->setAnt(ori->getTwin());
-
-    qDebug() << "prox da primeira " << ant->getOrigem()->getPoint();
-    ori->getTwin()->setProx(ant);
-    */
-
-
 }
 
 void Interface::addExtEdges(void)
@@ -180,24 +162,14 @@ void Interface::addExtEdges(void)
 
     for(int i = 0; i < lista.size(); ++i)
     {
-        qDebug() << "lista de " << i << ":" << lista[i]->getOrigem()->getPoint() << " -> " << lista[i]->getDestino()->getPoint();
-
         if(lista[i]->getTwin() == NULL)
         {
- //           qDebug() << "twin: NULL - adicionar na face externa";
             adicionaface(lista[i], faceExterna);
             componentesFaceExterna.push_back(lista[i]);
         }
- /*       else
-            qDebug() << "twin: " << lista[i]->getTwin()->getOrigem()->getPoint() << " -> " << lista[i]->getTwin()->getDestino()->getPoint();
-*/
     }
 
-//    qDebug() << "vou criar a kdt";
-
     kdt = new KDTree(map.values(),QRectF(minX,minY,minX+maxX, minY+maxY));
-
- //   qDebug() << "adicionou arestas externas";
 }
 
 HalfEdge* Interface::getArestaNear(QPointF p)
@@ -210,16 +182,12 @@ HalfEdge* Interface::getArestaNear(QPointF p)
 
     double realdist2;
 
-    //qDebug() << "Ponto p: " << p;
-
     for (int i = 0; i < lista->size(); i++)
     {
         e = lista->at(i);
 
         p1 = e->getOrigem()->getPoint();
         p2 = e->getDestino()->getPoint();
-
-       // qDebug() << "Reta: " << p1 << " - " << p2;
 
         double mod2 = modulo2(p1,p2);
 
@@ -230,8 +198,6 @@ HalfEdge* Interface::getArestaNear(QPointF p)
         double y = p1.y() + u * (p2.y() - p1.y());
 
         double dist2 = (p.x() - x)*(p.x() - x) + (p.y() - y)*(p.y() - y);
-
-       // qDebug() << "dist2 " << dist2 << "min " << min;
 
         QPointF dir = (p2 - p1)/sqrt(mod2);
 
@@ -336,4 +302,22 @@ double Interface::modulo2(QPointF p1, QPointF p2)
 
     return (x*x + y*y);
 
+}
+
+void Interface::clear(void)
+{
+    minX = INF;
+    minY = INF;
+    maxX = -INF;
+    maxY = -INF;
+    faceExterna = NULL;
+
+    if(kdt != NULL)
+        delete kdt;
+    kdt = NULL;
+
+    vertices.clear();
+    faces.clear();
+    map.clear();
+    componentesFaceExterna.clear();
 }

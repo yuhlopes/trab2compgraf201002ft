@@ -12,6 +12,7 @@ class HalfEdge : public QObject
     Q_OBJECT
 public:
     HalfEdge();
+    virtual ~HalfEdge();
 
 void setOrigem(Vertex *v);
 void setOrigem(QPoint *p);

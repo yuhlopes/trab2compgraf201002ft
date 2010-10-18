@@ -5,6 +5,10 @@ Face::Face()
 
 }
 
+Face::~Face()
+{
+}
+
 void Face::setOuterComp(HalfEdge *e)
 {
     this->outerComp = e;

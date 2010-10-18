@@ -148,20 +148,16 @@ void Render::recebeArquivo(const QString &filename)
     ponto->setX(0);
     ponto->setY(0);
 
-    //interface.clear();
-
     PlyParser ply(filename);
     
     tmp = ply.proximo();
 
-    // while(tmp.size() > 0)
+    interface.clear();
 
     int i_faces = 0;
     while (i_faces < ply.getNFaces())
     {
-        qDebug() << tmp;
         interface.addFace(tmp);
-//        qDebug() << "Passou";
 
         tmp = ply.proximo();
 
@@ -170,7 +166,6 @@ void Render::recebeArquivo(const QString &filename)
     interface.addExtEdges();
 
     reiniciaBuffers(screenW * zoom, screenH * zoom);
-
 
     atualizaScreen();
  }
@@ -185,7 +180,6 @@ void Render::atualizaScreen(void)
     screen = new QImage(screenW, screenH, QImage::Format_ARGB32_Premultiplied);
     p.begin(screen);
     p.setCompositionMode(QPainter::CompositionMode_Source);
-    //p.drawImage(0,0, *backBuffer);//debug
     p.drawImage(0,0, buffer->copy(ponto->x(),ponto->y(),screenW, screenH));
     p.setCompositionMode(QPainter::CompositionMode_SourceOver);
     p.drawImage(0,0, frontBuffer->copy(ponto->x(),ponto->y(),screenW, screenH));
@@ -195,13 +189,8 @@ void Render::atualizaScreen(void)
 
 void Render::incX()
 {
-    qDebug() << "incX";
     if(ponto->x() + INCPOS + screenW/2 < buffer->width())
-    {
-        qDebug() << "Posso";
         ponto->setX(ponto->x() + INCPOS);
-    }else
-        qDebug() << "Nao Posso";
 }
 void Render::decX()
 {
@@ -213,13 +202,11 @@ void Render::decX()
 }
 void Render::incY()
 {
-    qDebug() << "incY";
     if(ponto->y() + INCPOS + screenH/2 < buffer->height())
         ponto->setY(ponto->y() + INCPOS);
 }
 void Render::decY()
 {
-    qDebug() << "decY";
     if(ponto->y() - INCPOS >= 0)
         ponto->setY(ponto->y() - INCPOS);
     else
@@ -333,10 +320,6 @@ void Render::renderiza(void)
     {
         p1 = transforma(lista[i].first);
         p2 = transforma(lista[i].second);
-        qDebug() << "Original:" << lista[i].first;
-        qDebug() << "Transformado:" << p1;
-        qDebug() << "Destransformado:" << destransforma(p1);
-
 
         buff.drawLine(p1,p2);
 
@@ -365,15 +348,12 @@ void Render::click(void)
 
     if(rgb == corVerticeGrosso)
     {
-        qDebug() << "Vertice";
         v = interface.getVerticeNear(p1);
     }else if(rgb == corArestaGrossa)
     {
-        qDebug() << "Aresta";
         h = interface.getArestaNear(p1);
     }else if(rgb == corFace)
     {
-        qDebug() << "Face";
         f = interface.getFaceNear(p1);
     }
 
@@ -412,7 +392,6 @@ void Render::renderizaFront(void)
     verticeSelecionado();
     arestaSelecionada();
     faceSelecionada();
-    // Faltou fazer para face externa caso precise
 
     atualizaScreen();
 }
@@ -459,6 +438,7 @@ void Render::renderizaFaces()
     }
 
     QVector<HalfEdge *> *v;
+    QSet<Face*> f;
     if(fsel != NULL)
     {
         if(interface.isExterna(fsel))
@@ -481,12 +461,16 @@ void Render::renderizaFaces()
                 if(interface.isExterna(it->getTwin()->getFace()))
                     renderizaExterna = true;
                 else
-                    renderizaFace(it->getTwin(), frontBuffer,vizinhoScreen);
+                    f.insert(it->getTwin()->getFace());
             }
         }
         if(!interface.isExterna(fsel))
             delete v;
+        QSet<Face*>::iterator jt;
+        for(jt = f.begin(); jt != f.end(); ++jt)
+            renderizaFace((*jt)->getOuterComp(), frontBuffer,vizinhoScreen);
     }
+
 
     if(renderizaExterna)
         renderizaFaceExterna(&vizinhoScreen);
@@ -694,10 +678,11 @@ void Render::faceSelecionada()
 
 void Render::renderizaFaceExterna(QPen *pen)
 {
-
+    bool passa;
     QVector<HalfEdge*> *list = &(interface.componentesFaceExterna);
+    QVector<HalfEdge*> temp;
     HalfEdge *val;
-    HalfEdge::iterator it;
+    HalfEdge::iterator it, jt;
     QImage buffExt(buffer->width(), buffer->height(), QImage::Format_ARGB32_Premultiplied);
     QPainter p;
     p.begin(&buffExt);
@@ -708,13 +693,24 @@ void Render::renderizaFaceExterna(QPen *pen)
     for(int i = 0; i < list->size(); ++i)
     {
         val = list->at(i);
+        passa = false;
 
-        it = val->v_begin();
-        if(dentroFace(val->getTwin(),it->getDestino()->getPoint()) || componenteFaceUnica(&it))
-        {
+          for(it = val->v_begin(); it != val->v_end() ; ++it)
+            {
+               if(dentroFace(val->getTwin(),it->getDestino()->getPoint()))
+                {
+                    passa = true;
+                    break;
+                }
+            }
+
+        if( passa || componenteFaceUnica(&it))
             renderizaComponente(val->getTwin(),&buffExt,QPen(Qt::transparent));
-        }
+        else
+            temp.push_back(val->getTwin());
     }
+    for(int i = 0; i < temp.size(); ++i)
+        renderizaFace(temp[i],&buffExt,*pen);
 
     p.begin(frontBuffer);
     p.setCompositionMode(QPainter::CompositionMode_SourceOver);
@@ -782,8 +778,7 @@ bool Render::componenteFaceUnica(HalfEdge *h)
         b.insert(it->getDestino()->getPoint());
     }
 
-    c = a.intersect(b);
-    return (c == a || c == b);
+    return ((a - b).isEmpty() || (b-a).isEmpty());
 }
 
 uint qHash(const QPointF& p)

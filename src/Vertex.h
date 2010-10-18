@@ -11,6 +11,7 @@ class Vertex : public QObject
     Q_OBJECT
 public:
     Vertex();
+    virtual ~Vertex();
     Vertex(QPointF p);
 
     bool operator==( const Vertex &v2)const;

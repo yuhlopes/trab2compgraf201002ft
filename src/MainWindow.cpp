@@ -22,6 +22,8 @@ MainWindow::MainWindow()
 
     tb = new QToolBar("Tool Bar", this);
     fd = new QFileDialog(this, Qt::Window);
+    fd->setDirectory("..");
+    fd->setFilter("*.ply");
     
     
     connect(tb, SIGNAL(actionTriggered( QAction * )), this, SLOT(clicou(QAction*)));
@@ -56,49 +58,31 @@ void MainWindow::clicou(QAction* a)
         fd->open();
     else if(a == zoomIn)
     {
-        qDebug() << "Antes";
         fila->produz(INCZOOM);
-        qDebug() << "Depois";
     }else if (a == zoomOut)
     {
-        qDebug() << "Antes";
         fila->produz(DECZOOM);
-        qDebug() << "Depois";
     }else if (a == panU)
     {
-        qDebug() << "Antes";
         fila->produz(DECY);
-        qDebug() << "Depois";
     }else if (a == panL)
     {
-        qDebug() << "Antes";
         fila->produz(DECX);
-        qDebug() << "Depois";
     }else if (a == panD)
     {
-        qDebug() << "Antes";
         fila->produz(INCY);
-        qDebug() << "Depois";
     }else if(a == panR)
     {
-        qDebug() << "Antes";
         fila->produz(INCX);
-        qDebug() << "Depois";
     }else if(a == vertice)
     {
-        qDebug() << "Antes";
         fila->produz(PONTOS);
-        qDebug() << "Depois";
     }else if(a == aresta)
     {
-        qDebug() << "Antes";
         fila->produz(ARESTAS);
-        qDebug() << "Depois";
     }else if(a == face)
     {
-        qDebug() << "Antes";
         fila->produz(FACES);
-        qDebug() << "Depois";
     }
 }
 

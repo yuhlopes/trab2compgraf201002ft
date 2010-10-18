@@ -33,6 +33,7 @@ Vertex* getVerticeNear(QPointF p);
 bool isExterna(Face* f);
 QVector<HalfEdge* > componentesFaceExterna;
 Face *faceExterna;
+void clear(void);
 
 
 private:
