@@ -20,7 +20,7 @@ MainWindow::MainWindow()
     centralpanel = new RenderPanel(fila);
     setCentralWidget(centralpanel);
 
-    tb = new QToolBar("Tool Bar Teste", this);
+    tb = new QToolBar("Tool Bar", this);
     fd = new QFileDialog(this, Qt::Window);
     
     

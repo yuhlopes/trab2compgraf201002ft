@@ -184,19 +184,19 @@ void Interface::addExtEdges(void)
 
         if(lista[i]->getTwin() == NULL)
         {
-            qDebug() << "twin: NULL - adicionar na face externa";
+ //           qDebug() << "twin: NULL - adicionar na face externa";
             adicionaface(lista[i], faceExterna);
         }
-        else
+ /*       else
             qDebug() << "twin: " << lista[i]->getTwin()->getOrigem()->getPoint() << " -> " << lista[i]->getTwin()->getDestino()->getPoint();
-
+*/
     }
 
-    qDebug() << "vou criar a kdt";
+//    qDebug() << "vou criar a kdt";
 
     kdt = new KDTree(map.values(),QRectF(minX,minY,minX+maxX, minY+maxY));
 
-    qDebug() << "adicionou arestas externas";
+ //   qDebug() << "adicionou arestas externas";
 }
 
 HalfEdge* Interface::getArestaNear(QPointF p)
@@ -206,6 +206,8 @@ HalfEdge* Interface::getArestaNear(QPointF p)
     HalfEdge *e, *best = NULL;
     QPointF p1, p2;
     double min = INF;
+
+    double realdist2;
 
     //qDebug() << "Ponto p: " << p;
 
@@ -230,9 +232,31 @@ HalfEdge* Interface::getArestaNear(QPointF p)
 
        // qDebug() << "dist2 " << dist2 << "min " << min;
 
-        if (dist2 < min)
+        if (p1.x() == p2.x() &&  MIN(p1.y(),p2.y()) <= p.y() && p.y() <= MAX(p1.y(),p2.y()) )
         {
-            min = dist2;
+            realdist2 = (p1.x()-p.x())*(p1.x()-p.x());
+        }
+        else if ( p1.y() == p2.y() &&  MIN(p1.x(),p2.x()) <= p.x() && p.x() <= MAX(p1.x(),p2.x()))
+        {
+            realdist2 = (p1.y()-p.y())*(p1.y()-p.y());
+        }
+        else if  ( MIN(p1.x(),p2.x()) <= p.x() && p.x() <= MAX(p1.x(),p2.x()) &&
+              MIN(p1.y(),p2.y()) <= p.y() && p.y() <= MAX(p1.y(),p2.y()) )
+        {
+            realdist2 = dist2;
+        }
+        else
+        {
+            double dist2p1 = (p1.x()-p.x())*(p1.x()-p.x()) + (p1.y()-p.y())*(p1.y()-p.y());
+            double dist2p2 = (p2.x()-p.x())*(p2.x()-p.x()) + (p2.y()-p.y())*(p2.y()-p.y());
+
+            realdist2 = MIN(dist2p1,dist2p2);
+        }
+
+
+        if (realdist2 < min)
+        {
+            min = realdist2;
             best = e;
         }
 

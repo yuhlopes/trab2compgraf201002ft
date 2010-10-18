@@ -248,3 +248,9 @@ double KDTree::eProd(QPointF p1, QPointF p2)
     return (p1.x() * p2.x() + p1.y() * p2.y());
 }
 
+bool KDTree::aEsquerda(HalfEdge e1, HalfEdge e2)
+{
+    QPointF p1, p2;
+
+}
+
