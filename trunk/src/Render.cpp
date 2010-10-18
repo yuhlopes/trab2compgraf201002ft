@@ -185,7 +185,7 @@ void Render::atualizaScreen(void)
     screen = new QImage(screenW, screenH, QImage::Format_ARGB32_Premultiplied);
     p.begin(screen);
     p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.drawImage(0,0, *backBuffer);//debug
+    //p.drawImage(0,0, *backBuffer);//debug
     p.drawImage(0,0, buffer->copy(ponto->x(),ponto->y(),screenW, screenH));
     p.setCompositionMode(QPainter::CompositionMode_SourceOver);
     p.drawImage(0,0, frontBuffer->copy(ponto->x(),ponto->y(),screenW, screenH));
@@ -403,12 +403,9 @@ void Render::renderizaFront(void)
     p.end();
 
     if(mostraFace)
-    {
         renderizaFaces();
-    }
     if(mostraAresta)
         renderizaArestas();
-
     if(mostraPonto)
         renderizaVertices();
 
@@ -424,6 +421,7 @@ void Render::renderizaFaces()
 {
     HalfEdge *partida;
     HalfEdge::iterator it;
+    bool renderizaExterna = false;
 
     if(vsel != NULL)
         partida = vsel->getEdge();
@@ -434,27 +432,64 @@ void Render::renderizaFaces()
 
     if(vsel != NULL)
     {
-        renderizaFace(partida, vizinhoScreen);
+        if(interface.isExterna(partida->getFace()))
+            renderizaExterna = true;
+        else
+            renderizaFace(partida, frontBuffer,vizinhoScreen);
         for(it = partida->v_begin(); it != partida->v_end(); ++it)
         {
-            renderizaFace(&it, vizinhoScreen);
+            if(interface.isExterna(it->getFace()))
+                renderizaExterna = true;
+            else
+                renderizaFace(&it, frontBuffer,vizinhoScreen);
         }
     }
 
     if(hsel != NULL)
     {
-        renderizaFace(partida, vizinhoScreen);
-        renderizaFace(partida->getTwin(), vizinhoScreen);
+        if(interface.isExterna(partida->getFace()))
+            renderizaExterna = true;
+        else
+            renderizaFace(partida, frontBuffer,vizinhoScreen);
+
+        if(interface.isExterna(partida->getTwin()->getFace()))
+            renderizaExterna = true;
+        else
+            renderizaFace(partida->getTwin(), frontBuffer,vizinhoScreen);
     }
 
+    QVector<HalfEdge *> *v;
     if(fsel != NULL)
     {
-        renderizaFace(partida->getTwin(), vizinhoScreen);
-        for(it = partida->f_begin(); it != partida->f_end(); ++it)
+        if(interface.isExterna(fsel))
+            v = &(interface.componentesFaceExterna);
+        else
         {
-            renderizaFace(it->getTwin(), vizinhoScreen);
+            v = new QVector<HalfEdge *>();
+            v->push_back(partida->getTwin());
         }
+        for(int i = 0; i < v->size(); ++i)
+        {
+            partida = v->at(i)->getTwin();
+
+            if(interface.isExterna(partida->getTwin()->getFace()))
+                renderizaExterna = true;
+            else
+                renderizaFace(partida->getTwin(), frontBuffer,vizinhoScreen);
+            for(it = partida->f_begin(); it != partida->f_end(); ++it)
+            {
+                if(interface.isExterna(it->getTwin()->getFace()))
+                    renderizaExterna = true;
+                else
+                    renderizaFace(it->getTwin(), frontBuffer,vizinhoScreen);
+            }
+        }
+        if(!interface.isExterna(fsel))
+            delete v;
     }
+
+    if(renderizaExterna)
+        renderizaFaceExterna(&vizinhoScreen);
 }
 
 void Render::renderizaArestas()
@@ -489,13 +524,28 @@ void Render::renderizaArestas()
         }else
             buff.drawLine(transforma(partida->getOrigem()->getPoint()), transforma(partida->getDestino()->getPoint()));
     }
+    QVector<HalfEdge *> *v;
     if(fsel != NULL)
     {
-        for(it = partida->f_begin(); it != partida->f_end(); ++it)
+        if(interface.isExterna(fsel))
+            v = &(interface.componentesFaceExterna);
+        else
         {
-            buff.drawLine(transforma(it->getOrigem()->getPoint()), transforma(it->getDestino()->getPoint()));
+            v = new QVector<HalfEdge *>();
+            v->push_back(partida->getTwin());
         }
-        buff.drawLine(transforma(partida->getOrigem()->getPoint()), transforma(partida->getDestino()->getPoint()));
+        for(int i = 0; i < v->size(); ++i)
+        {
+            partida = v->at(i)->getTwin();
+
+            for(it = partida->f_begin(); it != partida->f_end(); ++it)
+            {
+                buff.drawLine(transforma(it->getOrigem()->getPoint()), transforma(it->getDestino()->getPoint()));
+            }
+            buff.drawLine(transforma(partida->getOrigem()->getPoint()), transforma(partida->getDestino()->getPoint()));
+        }
+        if(!interface.isExterna(fsel))
+            delete v;
     }
 
 }
@@ -531,13 +581,27 @@ void Render::renderizaVertices()
         }else
             buff.drawEllipse(transforma(partida->getDestino()->getPoint()), 5,5);
     }
+    QVector<HalfEdge *> *v;
     if(fsel != NULL)
     {
-        for(it = partida->f_begin(); it != partida->f_end(); ++it)
+        if(interface.isExterna(fsel))
+            v = &(interface.componentesFaceExterna);
+        else
         {
-            buff.drawEllipse(transforma(it->getOrigem()->getPoint()), 5,5);
+            v = new QVector<HalfEdge *>();
+            v->push_back(partida->getTwin());
         }
-        buff.drawEllipse(transforma(partida->getOrigem()->getPoint()), 5,5);
+        for(int i = 0; i < v->size(); ++i)
+        {
+            partida = v->at(i)->getTwin();
+            for(it = partida->f_begin(); it != partida->f_end(); ++it)
+            {
+                buff.drawEllipse(transforma(it->getOrigem()->getPoint()), 5,5);
+            }
+            buff.drawEllipse(transforma(partida->getOrigem()->getPoint()), 5,5);
+        }
+        if(!interface.isExterna(fsel))
+            delete v;
     }
 }
 
@@ -571,20 +635,12 @@ void Render::reiniciaBuffers(int w, int h)
     renderizaFront();
 }
 
-void Render::renderizaFace(HalfEdge *h, QPen pen)
+void Render::renderizaFace(HalfEdge *h,QImage* b,QPen pen)
 {
-    QPainter buff(frontBuffer);
+    QPainter buff(b);
     QPainterPath *path;
     QPoint p;
     HalfEdge::iterator it;
-
-    if(interface.isExterna(h->getFace()))
-        return;
-
-    if(pen == vizinhoScreen)
-        qDebug() << "pintando face com vizinhoScreen";
-    else if(pen == selecionadoScreen)
-        qDebug() << "pintando face com seleciodoScreen";
 
     buff.setPen(pen);
 
@@ -630,5 +686,107 @@ void Render::faceSelecionada()
     if(fsel == NULL)
         return;
 
-    renderizaFace(fsel->getOuterComp(), selecionadoScreen);
+    if(interface.isExterna(fsel))
+        renderizaFaceExterna(&selecionadoScreen);
+    else
+        renderizaFace(fsel->getOuterComp(), frontBuffer,selecionadoScreen);
+}
+
+void Render::renderizaFaceExterna(QPen *pen)
+{
+
+    QVector<HalfEdge*> *list = &(interface.componentesFaceExterna);
+    HalfEdge *val;
+    HalfEdge::iterator it;
+    QImage buffExt(buffer->width(), buffer->height(), QImage::Format_ARGB32_Premultiplied);
+    QPainter p;
+    p.begin(&buffExt);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.fillRect(buffExt.rect(), pen->color());
+    p.end();
+
+    for(int i = 0; i < list->size(); ++i)
+    {
+        val = list->at(i);
+
+        it = val->v_begin();
+        if(dentroFace(val->getTwin(),it->getDestino()->getPoint()) || componenteFaceUnica(&it))
+        {
+            renderizaComponente(val->getTwin(),&buffExt,QPen(Qt::transparent));
+        }
+    }
+
+    p.begin(frontBuffer);
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    p.drawImage(0,0, buffExt);
+    p.end();
+}
+
+bool Render::dentroFace(HalfEdge* h, QPointF p)
+{
+    HalfEdge::iterator it;
+    QVector<QPointF> list;
+
+    list.push_back(h->getOrigem()->getPoint());
+    for(it = h->f_begin(); it != h->f_end(); ++it)
+    {
+        list.push_back(it->getOrigem()->getPoint());
+    }
+
+    QPolygonF po(list);
+
+    return po.containsPoint(p, Qt::OddEvenFill);
+}
+
+void Render::renderizaComponente(HalfEdge *h,QImage* b,QPen pen)
+{
+    QPainter buff(b);
+    QPainterPath *path;
+    QPoint p;
+    HalfEdge::iterator it;
+
+    buff.setPen(pen);
+
+    path = new QPainterPath();
+    p = transforma(h->getOrigem()->getPoint());
+    path->moveTo(p.x(),p.y());
+    for(it = h->f_begin(); it !=  h->f_end(); ++it)
+    {
+        p = transforma(it->getOrigem()->getPoint());
+        path->lineTo(p.x(),p.y());
+    }
+    p = transforma(h->getOrigem()->getPoint());
+    path->lineTo(p.x(),p.y());
+
+    buff.setCompositionMode(QPainter::CompositionMode_Source);
+    buff.fillPath(*path,pen.brush());
+    delete path;
+}
+
+bool Render::componenteFaceUnica(HalfEdge *h)
+{
+    QSet<QPointF> a;
+    QSet<QPointF> b;
+    QSet<QPointF> c;
+    HalfEdge::iterator it;
+
+    a.insert(h->getOrigem()->getPoint());
+    for(it = h->f_begin(); it != h->f_end(); ++it)
+    {
+        a.insert(it->getOrigem()->getPoint());
+    }
+
+    b.insert(h->getTwin()->getDestino()->getPoint());
+    for(it = h->getTwin()->f_begin(); it != h->getTwin()->f_end(); ++it)
+    {
+        b.insert(it->getDestino()->getPoint());
+    }
+
+    c = a.intersect(b);
+    return (c == a || c == b);
+}
+
+uint qHash(const QPointF& p)
+{
+    return (uint)qRound(p.x()*p.y());
 }
