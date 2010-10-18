@@ -24,6 +24,7 @@ public:
     int getNFaces(void);
     
 private:
+    bool semPalavras(QString s);
     int nVertices;
     int nFaces;
     QVector<QPointF> pontos;
