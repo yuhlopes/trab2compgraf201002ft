@@ -99,6 +99,9 @@ void Render::run(void) {
                 sel->setY(ex.y);
                 click();
                 break;
+            case DELETA:
+                deleta();
+                break;
         }
         atualizaScreen();
     } while (true);
@@ -311,8 +314,11 @@ void Render::renderiza(void)
     QPainter buff(buffer);
     QPainter back(backBuffer);
 
+    buff.fillRect(buffer->rect(), Qt::white);
     buff.fillRect(buffer->rect(),Qt::transparent);
+    back.fillRect(backBuffer->rect(), Qt::white);
     back.fillRect(backBuffer->rect(), Qt::transparent);
+
 
     buff.setPen(arestaScreen);
 
@@ -346,6 +352,7 @@ void Render::click(void)
     QRgb rgb = backBuffer->pixel(p2);
     p1 = destransforma(p2);
 
+
     if(rgb == corVerticeGrosso)
     {
         v = interface.getVerticeNear(p1);
@@ -356,6 +363,7 @@ void Render::click(void)
     {
         f = interface.getFaceNear(p1);
     }
+
 
     if(hsel != NULL)
         t = hsel->getTwin();
@@ -784,4 +792,31 @@ bool Render::componenteFaceUnica(HalfEdge *h)
 uint qHash(const QPointF& p)
 {
     return (uint)qRound(p.x()*p.y());
+}
+
+void Render::deleta()
+{
+    if(hsel != NULL)
+    {
+        if(interface.isExterna(hsel->getFace()) || interface.isExterna(hsel->getTwin()->getFace())){
+            qDebug() << "Deleta aresta";
+            if(interface.isExterna(hsel->getFace()))
+                interface.deletaArestaExterna(hsel->getTwin());
+            else
+                interface.deletaArestaExterna(hsel);
+
+            hsel = NULL;
+
+            renderiza();
+            renderizaFront();
+        }
+        else
+        {
+            qDebug() << "Aresta interna";
+        }
+
+    }else
+    {
+        qDebug() << "Nao deleta nada ainda...";
+    }
 }

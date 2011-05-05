@@ -142,8 +142,10 @@ HalfEdge::Iterator& HalfEdge::Iterator::operator++()
     if(modo == HalfEdge::Iterator::Face)
         atual = atual->getProx();
 
-    if(modo == HalfEdge::Iterator::Vertice)
-        atual = atual->getTwin()->getProx();
+    if(modo == HalfEdge::Iterator::Vertice){
+        atual =atual->getTwin()->getProx();
+
+    }
 
     return *this;
 }

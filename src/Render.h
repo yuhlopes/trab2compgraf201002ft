@@ -58,6 +58,7 @@ private:
         bool dentroFace(HalfEdge* h, QPointF p);
         void renderizaComponente(HalfEdge *h,QImage* b,QPen pen);
         bool componenteFaceUnica(HalfEdge *h);
+        void deleta();
 
         Vertex* vsel;
         HalfEdge* hsel;

@@ -30,7 +30,7 @@ private:
    QAction *vertice;
    QAction *aresta;
    QAction *face;
-
+   QAction *del;
 
 };
 

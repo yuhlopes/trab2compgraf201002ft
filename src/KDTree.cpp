@@ -3,11 +3,17 @@
 
 KDTree::KDTree(const QList<HalfEdge *> &list, QRectF limite)
 {
+    qDebug() << "Top:" << limite.top();
+    qDebug() << "Left:" << limite.left();
+    qDebug() << "Bottom:" << limite.bottom();
+    qDebug() << "Rigth:" << limite.right();
+return;
     if(list.size() > 0)
     {
         raiz = divide(new QList<HalfEdge *>(list), limite, true);
     }else
         raiz = NULL;
+    qsrand(0);
 }
 
 KDTree::~KDTree()
@@ -24,15 +30,23 @@ NO* KDTree::divide(QList<HalfEdge *> *list, QRectF limite, bool primeiro)
     QRectF retD(limite);
     QList<HalfEdge *> *esq = new QList<HalfEdge *>();
     QList<HalfEdge *> *dir = new QList<HalfEdge *>();
+    if(primeiro)
+        qDebug() << "Dividir em x";
+    else
+        qDebug() << "Dividir em y";
 
     v = pivoteia(list, limite, primeiro, esq, dir);
 
-    if(esq->size() < 0 || dir->size() < 0 || esq->size() == list->size() || dir->size() == list->size())
+    qDebug() << "P1";
+
+    if(esq->size() == 0 || dir->size() == 0 || (esq->size() == list->size() && dir->size() == list->size()))
     {
         delete esq;
         delete dir;
         return NULL;
     }
+
+    qDebug() << "P2";
 
     no = new NO();
     no->chave = v;
@@ -47,8 +61,12 @@ NO* KDTree::divide(QList<HalfEdge *> *list, QRectF limite, bool primeiro)
         retD.setBottom(v);
     }
 
+    qDebug() << "P3";
+
     no->esq = divide(esq, retE, !primeiro);
+    qDebug() << "P4";
     no->dir = divide(dir, retD, !primeiro);
+    qDebug() << "P5";
 
     if(no->esq == NULL && no->dir == NULL)
     {
@@ -67,6 +85,7 @@ NO* KDTree::divide(QList<HalfEdge *> *list, QRectF limite, bool primeiro)
     {
         delete list;
     }
+    qDebug() << "P6";
 
     return no;
 
@@ -76,47 +95,46 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
 {
     int it;
     int piv;
+    double corte;
     QPoint p1, p2;
     HalfEdge *p;
     HalfEdge *i;
-    QList<SORTEADOR> *l = new QList<SORTEADOR>();
-    SORTEADOR sort;
 
-    for(int i = 0; i < list->size(); ++i)
-    {
-        sort.ind = i;
-        if(primeiro)
-            sort.val = list->operator [](i)->getOrigem()->getPoint().x();
-        else
-            sort.val = list->operator [](i)->getOrigem()->getPoint().y();
-        l->push_back(sort);
-    }
-
-    qSort(*l);
-
-    piv = list->size()/2;
-    int j = l->operator [](piv).ind;
-    p = list->operator [](j);
-    l->clear();
-    delete l;
+    qDebug() << "U1";
 
     if(primeiro)
     {
-        p1.setX(p->getOrigem()->getPoint().x());
-        p2.setX(p->getOrigem()->getPoint().x());
+        corte = (double)qrand()/(double)RAND_MAX;
+        corte = corte * (limite.right() - limite.left()) + limite.left();
+    }else
+    {
+        corte = (double)qrand()/(double)RAND_MAX;
+        corte = corte * (limite.bottom() - limite.top()) + limite.top();
+    }
+
+    qDebug() << "reg" << limite << " corte " << corte;
+
+    qDebug() << "U2";
+
+    if(primeiro)
+    {
+        p1.setX(corte);
+        p2.setX(corte);
         p1.setY(limite.top());
         p2.setY(limite.bottom());
     }else
     {
-        p1.setY(p->getOrigem()->getPoint().y());
-        p2.setY(p->getOrigem()->getPoint().y());
+        p1.setY(corte);
+        p2.setY(corte);
         p1.setX(limite.left());
         p2.setX(limite.right());
     }
 
+    qDebug() << "U3";
+
     for(it = 0; it < list->size(); ++it)
     {
-        i = list->operator [](it);
+        i = list->at(it);
         if(cruza(QLineF(p1,p2), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint())))
         {
             men->push_back(i);
@@ -125,10 +143,9 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
         {
             if((cruza(QLineF(limite.bottomLeft(),limite.topLeft()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
             ||  cruza(QLineF(p1,limite.topLeft()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
-            ||  cruza(QLineF(p2,limite.bottomLeft()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))) &&
-            (  !cruza(QLineF(limite.bottomRight(),limite.topRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
-            && !cruza(QLineF(p1,limite.topRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
-            && !cruza(QLineF(p2,limite.bottomRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))))
+            ||  cruza(QLineF(p2,limite.bottomLeft()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))) ||
+               (i->getOrigem()->getPoint().x() >= limite.left() && i->getOrigem()->getPoint().x() <= corte &&
+                i->getOrigem()->getPoint().y() <= limite.top() && i->getOrigem()->getPoint().y() >= limite.bottom()))
                 men->push_back(i);
             else
                 mai->push_back(i);
@@ -136,20 +153,19 @@ double KDTree::pivoteia(QList<HalfEdge *> *list, QRectF limite, bool primeiro, Q
         {
             if((cruza(QLineF(limite.bottomLeft(),limite.bottomRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
             ||  cruza(QLineF(p1,limite.bottomLeft()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
-            ||  cruza(QLineF(p2,limite.bottomRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint())) )
-            && !cruza(QLineF(limite.topLeft(),limite.topRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
-            && !cruza(QLineF(p1,limite.topLeft()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint()))
-            && !cruza(QLineF(p2,limite.topRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint())))
+            ||  cruza(QLineF(p2,limite.bottomRight()), QLineF(i->getOrigem()->getPoint() , i->getDestino()->getPoint())) ) ||
+                (i->getOrigem()->getPoint().x() >= limite.left() && i->getOrigem()->getPoint().x() <= limite.right() &&
+                i->getOrigem()->getPoint().y() <= corte && i->getOrigem()->getPoint().y() >= limite.bottom()))
                 men->push_back(i);
             else
                 mai->push_back(i);
         }
+        qDebug() << "U4";
     }
 
-    if(primeiro)
-        return p->getOrigem()->getPoint().x();
-    else
-        return p->getOrigem()->getPoint().y();
+    qDebug() << "U5";
+
+    return corte;
 
 }
 
@@ -184,25 +200,38 @@ QList<HalfEdge *>* KDTree::find(const QPointF &p)
 QList<HalfEdge *>* KDTree::busca(const QPointF &p, NO* no,bool primeiro)
 {
     double v;
-    if(primeiro)
-        v = p.x();
-    else
-        v = p.y();
 
-    if(v < no->chave)
+    if(primeiro)
     {
-        if(no->esq == NULL)
-            return no->lista;
-        else
-            return busca(p, no->esq, !primeiro);
+        if(p.x() < no->chave)
+        {
+            if(no->esq == NULL)
+                return no->lista;
+            else
+                return busca(p,no->esq,!primeiro);
+        }else
+        {
+            if(no->dir == NULL)
+                return no->lista;
+            else
+                return busca(p,no->dir,!primeiro);
+        }
     }else
     {
-        if(no->dir == NULL)
-            return no->lista;
-        else
-            return busca(p, no->dir, !primeiro);
+        if(p.y() > no->chave)
+        {
+            if(no->esq == NULL)
+                return no->lista;
+            else
+                return busca(p,no->esq,!primeiro);
+        }else
+        {
+            if(no->dir == NULL)
+                return no->lista;
+            else
+                return busca(p,no->dir,!primeiro);
+        }
     }
-
 }
 
 void KDTree::limpa(NO* no)
