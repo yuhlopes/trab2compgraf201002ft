@@ -32,8 +32,8 @@ Face* getFaceNear(QPointF p);
 Vertex* getVerticeNear(QPointF p);
 bool isExterna(Face* f);
 QVector<HalfEdge* > componentesFaceExterna;
-Face *faceExterna;
 void clear(void);
+void deletaArestaExterna(HalfEdge *);
 
 
 private:
@@ -42,6 +42,7 @@ private:
     QVector<Face*> faces;
     QMap<QPair<QPointF,QPointF>, HalfEdge *> map;
     double minX, minY, maxX, maxY;
+    Face *faceExterna;
 
 
     Vertex* addVertex(QPointF p);
@@ -50,6 +51,9 @@ private:
     double vProd(QPointF p1, QPointF p2);
     double eProd(QPointF p1, QPointF p2);
     double modulo2(QPointF p1, QPointF p2);
+
+    void retiraface(Face* f);
+    void retirahalfedge(HalfEdge *h);
 };
 
 #endif // INTERFACE_H

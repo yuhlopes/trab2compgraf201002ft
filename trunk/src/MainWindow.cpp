@@ -43,6 +43,7 @@ MainWindow::MainWindow()
     vertice = tb->addAction(v,"");
     aresta = tb->addAction(a,"");
     face = tb->addAction(f, "");
+    del = tb->addAction("deleta");
 
     addToolBar(Qt::LeftToolBarArea, tb);
 
@@ -83,6 +84,9 @@ void MainWindow::clicou(QAction* a)
     }else if(a == face)
     {
         fila->produz(FACES);
+    }else if(a ==del)
+    {
+        fila->produz(DELETA);
     }
 }
 

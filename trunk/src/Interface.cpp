@@ -168,13 +168,19 @@ void Interface::addExtEdges(void)
             componentesFaceExterna.push_back(lista[i]);
         }
     }
+    QRectF rect;
+    rect.setBottom(maxY);
+    rect.setTop(minY);
+    rect.setLeft(minX);
+    rect.setRight(maxX);
 
-    kdt = new KDTree(map.values(),QRectF(minX,minY,minX+maxX, minY+maxY));
+    kdt = new KDTree(map.values(),rect);
 }
 
 HalfEdge* Interface::getArestaNear(QPointF p)
 {
-    QList<HalfEdge *> *lista = new QList<HalfEdge *>(map.values());//kdt->find(p);
+    QList<HalfEdge *> *lista = new QList<HalfEdge *>(map.values());
+    //QList<HalfEdge *> *lista = kdt->find(p);
 
     HalfEdge *e, *best = NULL;
     QPointF p1, p2;
@@ -225,23 +231,30 @@ HalfEdge* Interface::getArestaNear(QPointF p)
 
     }
 
+    delete lista;
+
     return best;
-
-
 }
 Face* Interface::getFaceNear(QPointF p)
 {
     HalfEdge *min = getArestaNear(p);
 
+    if(isExterna(min->getFace()))
+        min = min->getTwin();
+
     if(dentroFace(min,p))
         return min->getFace();
 
-    return min->getTwin()->getFace();
+    if(isExterna(min->getTwin()->getFace()) || dentroFace(min->getTwin(),p))
+        return min->getTwin()->getFace();
+
+    return NULL;
 }
 
 Vertex* Interface::getVerticeNear(QPointF p)
 {
-    QList<HalfEdge *> *lista = new QList<HalfEdge *>(map.values()); //kdt->find(p);
+    QList<HalfEdge *> *lista = new QList<HalfEdge *>(map.values());
+    //QList<HalfEdge *> *lista = kdt->find(p);
     Vertex* menor = NULL;
     double distMenor = INF;
     double dist;
@@ -320,4 +333,52 @@ void Interface::clear(void)
     faces.clear();
     map.clear();
     componentesFaceExterna.clear();
+}
+
+
+void Interface::deletaArestaExterna(HalfEdge * h_int)
+{
+    h_int->getProx()->setFace(faceExterna);
+    h_int->getAnt()->setFace(faceExterna);
+    //atualizando o ponteiro vertice->halfedge
+    Vertex* v = h_int->getOrigem();
+    if(v->getEdge() == h_int)
+        v->setEdge(h_int->getAnt()->getTwin());
+
+    v = h_int->getDestino();
+    if(v->getEdge() == h_int->getTwin())
+        v->setEdge(h_int->getProx());
+
+    //o proximo do anterior é o proximo do gemeo
+    h_int->getAnt()->setProx(h_int->getTwin()->getProx());
+    h_int->getProx()->setAnt(h_int->getTwin()->getAnt());
+    //o proximo do anterior do twin vai ser o meu proximo
+    h_int->getTwin()->getAnt()->setProx(
+            h_int->getProx()
+    );
+    h_int->getTwin()->getProx()->setAnt(
+            h_int->getAnt()
+    );
+
+
+    retiraface(h_int->getFace());
+    delete h_int->getFace();
+    retirahalfedge(h_int->getTwin());
+    retirahalfedge(h_int);
+    delete h_int->getTwin();
+    delete h_int;
+}
+
+void Interface::retiraface(Face* f)
+{
+    for(int i = 0; i < faces.size(); i++){
+        if((faces[i]) == f){
+            faces.remove(i);
+            break;
+        }
+    }
+}
+
+void Interface::retirahalfedge(HalfEdge *h) {
+    map.erase(map.find(map.key(h)));
 }
