@@ -102,6 +102,9 @@ void Render::run(void) {
             case DELETA:
                 deleta();
                 break;
+            case VDV:
+                vdv();
+                break;
         }
         atualizaScreen();
     } while (true);
@@ -796,27 +799,116 @@ uint qHash(const QPointF& p)
 
 void Render::deleta()
 {
+    //se hsel eh diferente de nulo, essa ARESTA esta selecionada
+    //se fsel eh diferente de nulo, essa FACE esta selecionada
+    //se vsel eh diferente de nulo, esse VERTICE esta selecionado
+
+    //para verificar se a face f eh externa, use: interface.isExterna(f);
+
+
     if(hsel != NULL)
     {
+
         if(interface.isExterna(hsel->getFace()) || interface.isExterna(hsel->getTwin()->getFace())){
-            qDebug() << "Deleta aresta";
+            HalfEdge *externa = hsel->getTwin(), *interna = hsel;
+
+            if (interface.isExterna(hsel->getFace()))
+            {
+                externa = hsel;
+                interna = hsel->getTwin();
+            }
+
+            Vertex *origem  = hsel->getOrigem();
+            Vertex *destino = hsel->getDestino();
+
+            QPair<QPointF,QPointF> par1  =
+                    QPair<QPointF,QPointF>(origem->getPoint(),destino->getPoint());
+
+            QPair<QPointF,QPointF> par2  =
+                    QPair<QPointF,QPointF>(destino->getPoint(),origem->getPoint());
+
+            interface.getMap().remove(par1);
+            interface.getMap().remove(par2);
+
+            Face * nExter = hsel->getFace();
+
             if(interface.isExterna(hsel->getFace()))
-                interface.deletaArestaExterna(hsel->getTwin());
-            else
-                interface.deletaArestaExterna(hsel);
+            {
+                nExter = hsel->getTwin()->getFace();
+            }
+
+            QVector<Face *> faces = interface.getFaces();
+
+            for(int i = 0; i < faces.size(); i++)
+            {
+                Face *atual = faces[i];
+
+                if (atual == nExter)
+                {
+                    faces.remove(i);
+                    break;
+                }
+            }
+
+
+            //Atualizar a face das dentro do poligono
+            HalfEdge *it = interna->getProx();
+
+            while(it!= interna){
+                it->setFace(externa->getFace());
+                it = it->getProx();
+            }
+            //Atualizar a anterior e a proxima
+            externa->getAnt()->setProx(interna->getProx());
+            externa->getProx()->setAnt(interna->getAnt());
+
+            interna->getProx()->setAnt(externa->getAnt());
+            interna->getAnt()->setProx(externa->getProx());
 
             hsel = NULL;
-
             renderiza();
             renderizaFront();
         }
-        else
-        {
-            qDebug() << "Aresta interna";
-        }
-
-    }else
-    {
-        qDebug() << "Nao deleta nada ainda...";
     }
+    qDebug() << "Chegou!";
+}
+
+void Render::vdv()
+{
+    QPainter buff(frontBuffer);
+    QPoint p;
+    HalfEdge *partida, *partida2;
+    HalfEdge *prox;
+    HalfEdge *half;
+    Vertex *aux;
+
+    Vertex *v;
+
+    buff.setPen(vizinhoScreen);
+
+    if(vsel != NULL)
+        partida = vsel->getEdge();
+    else
+        return;
+
+    partida2 = partida->getProx();
+
+    prox = partida2;
+    do {
+        aux = prox->getDestino();
+        buff.drawEllipse(transforma(aux->getPoint()),5,5);
+
+        prox = prox->getTwin()->getProx();
+    } while (prox != partida2);
+
+    partida2 = partida->getTwin()->getProx()->getProx();
+
+    prox = partida2;
+    do {
+        aux = prox->getDestino();
+        buff.drawEllipse(transforma(aux->getPoint()),5,5);
+
+        prox = prox->getTwin()->getProx();
+    } while (prox != partida2);
+
 }

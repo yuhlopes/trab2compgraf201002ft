@@ -74,18 +74,21 @@ void Interface::addFace(QVector<QPointF> in)
 
 Vertex* Interface::addVertex(QPointF p)
 {
-    QMap<QPointF,Vertex*>::iterator it;
+    QMap<QPointF, Vertex*>::iterator it;
+    Vertex* v = NULL;
 
     it = vertices.find(p);
-    if (it == vertices.end())
-    {
-        Vertex *v = new Vertex(p);
-        vertices[p] = v;
 
-        return v;
+    if(it != vertices.end())
+    {
+        v = it.value();
+    }else
+    {
+        v = new Vertex(p);
+        vertices.insert(p,v);
     }
 
-    return it.value();
+    return v;
 }
 
 HalfEdge* Interface::findTwin(QPointF u, QPointF v)
@@ -329,56 +332,61 @@ void Interface::clear(void)
         delete kdt;
     kdt = NULL;
 
-    vertices.clear();
     faces.clear();
     map.clear();
     componentesFaceExterna.clear();
+    vertices.clear();
 }
 
-
-void Interface::deletaArestaExterna(HalfEdge * h_int)
+QMap<QPair<QPointF,QPointF>, HalfEdge *>& Interface::getMap()
 {
-    h_int->getProx()->setFace(faceExterna);
-    h_int->getAnt()->setFace(faceExterna);
-    //atualizando o ponteiro vertice->halfedge
-    Vertex* v = h_int->getOrigem();
-    if(v->getEdge() == h_int)
-        v->setEdge(h_int->getAnt()->getTwin());
-
-    v = h_int->getDestino();
-    if(v->getEdge() == h_int->getTwin())
-        v->setEdge(h_int->getProx());
-
-    //o proximo do anterior é o proximo do gemeo
-    h_int->getAnt()->setProx(h_int->getTwin()->getProx());
-    h_int->getProx()->setAnt(h_int->getTwin()->getAnt());
-    //o proximo do anterior do twin vai ser o meu proximo
-    h_int->getTwin()->getAnt()->setProx(
-            h_int->getProx()
-    );
-    h_int->getTwin()->getProx()->setAnt(
-            h_int->getAnt()
-    );
-
-
-    retiraface(h_int->getFace());
-    delete h_int->getFace();
-    retirahalfedge(h_int->getTwin());
-    retirahalfedge(h_int);
-    delete h_int->getTwin();
-    delete h_int;
+    return map;
 }
 
-void Interface::retiraface(Face* f)
+QVector<Face*>& Interface::getFaces()
 {
-    for(int i = 0; i < faces.size(); i++){
-        if((faces[i]) == f){
+    return faces;
+}
+
+void Interface::removeFaceFromCollection(Face* f)
+{
+    for(int i = 0; i < faces.size(); ++i)
+    {
+        if(faces[i] == f)
+        {
             faces.remove(i);
-            break;
+            return;
         }
     }
 }
 
-void Interface::retirahalfedge(HalfEdge *h) {
-    map.erase(map.find(map.key(h)));
+void Interface::removeEdgeFromCollection(HalfEdge* e)
+{
+    QMap<QPair<QPointF,QPointF>, HalfEdge* >::iterator it;
+    for(it = map.begin(); it != map.end(); ++it)
+    {
+        if(e == it.value())
+        {
+            map.erase(it);
+            break;
+        }
+    }
+
+    for(it = map.begin(); it != map.end(); ++it)
+    {
+        if(e->getTwin() == it.value())
+        {
+            map.erase(it);
+            break;
+        }
+    }
+
+    for(int i  =0; i < componentesFaceExterna.size(); ++i)
+    {
+        if(componentesFaceExterna[i] == e || componentesFaceExterna[i] == e->getTwin())
+        {
+            componentesFaceExterna[i] = componentesFaceExterna[i]->getProx();
+            break;
+        }
+    }
 }
