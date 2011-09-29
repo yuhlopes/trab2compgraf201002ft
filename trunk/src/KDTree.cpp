@@ -3,10 +3,6 @@
 
 KDTree::KDTree(const QList<HalfEdge *> &list, QRectF limite)
 {
-    qDebug() << "Top:" << limite.top();
-    qDebug() << "Left:" << limite.left();
-    qDebug() << "Bottom:" << limite.bottom();
-    qDebug() << "Rigth:" << limite.right();
 return;
     if(list.size() > 0)
     {

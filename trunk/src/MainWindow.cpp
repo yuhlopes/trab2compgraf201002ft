@@ -22,7 +22,7 @@ MainWindow::MainWindow()
 
     tb = new QToolBar("Tool Bar", this);
     fd = new QFileDialog(this, Qt::Window);
-    fd->setDirectory("..");
+    fd->setDirectory("../../halfedge/resources");
     fd->setFilter("*.ply");
     
     
@@ -44,6 +44,7 @@ MainWindow::MainWindow()
     aresta = tb->addAction(a,"");
     face = tb->addAction(f, "");
     del = tb->addAction("deleta");
+    vdv = tb->addAction("VDV");
 
     addToolBar(Qt::LeftToolBarArea, tb);
 
@@ -87,6 +88,9 @@ void MainWindow::clicou(QAction* a)
     }else if(a ==del)
     {
         fila->produz(DELETA);
+    }else if(a == vdv)
+    {
+        fila->produz(VDV);
     }
 }
 

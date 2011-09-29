@@ -31,6 +31,7 @@ private:
    QAction *aresta;
    QAction *face;
    QAction *del;
+   QAction *vdv;
 
 };
 
