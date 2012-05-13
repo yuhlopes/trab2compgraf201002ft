@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Vizualizador de malha com Half-Edge</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionOpen_File"/>
+   <addaction name="separator"/>
+   <addaction name="actionZoom_In"/>
+   <addaction name="actionZoom_Out"/>
+   <addaction name="separator"/>
+   <addaction name="actionUp"/>
+   <addaction name="actionLeft"/>
+   <addaction name="actionRight"/>
+   <addaction name="actionDown"/>
+   <addaction name="separator"/>
+   <addaction name="actionVertice"/>
+   <addaction name="actionAresta"/>
+   <addaction name="actionFace"/>
+  </widget>
+  <action name="actionOpen_File">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/open</normaloff>:/open</iconset>
+   </property>
+   <property name="text">
+    <string>Open File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/zoom-in</normaloff>:/zoom-in</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/zoom-out</normaloff>:/zoom-out</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionUp">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/arrow-up</normaloff>:/arrow-up</iconset>
+   </property>
+   <property name="text">
+    <string>Up</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Up</string>
+   </property>
+  </action>
+  <action name="actionLeft">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/arrow-left</normaloff>:/arrow-left</iconset>
+   </property>
+   <property name="text">
+    <string>Left</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionRight">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/arrow-rigth</normaloff>:/arrow-rigth</iconset>
+   </property>
+   <property name="text">
+    <string>Right</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionDown">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/arrow-down</normaloff>:/arrow-down</iconset>
+   </property>
+   <property name="text">
+    <string>Down</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Down</string>
+   </property>
+  </action>
+  <action name="actionVertice">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/vertice</normaloff>:/vertice</iconset>
+   </property>
+   <property name="text">
+    <string>Vertice</string>
+   </property>
+  </action>
+  <action name="actionAresta">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/aresta</normaloff>:/aresta</iconset>
+   </property>
+   <property name="text">
+    <string>Aresta</string>
+   </property>
+  </action>
+  <action name="actionFace">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/face</normaloff>:/face</iconset>
+   </property>
+   <property name="text">
+    <string>Face</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../trab2FT.qrc"/>
+ </resources>
+ <connections/>
+</ui>

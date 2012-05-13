@@ -4,7 +4,6 @@ HalfEdge::HalfEdge()
 {
     this->prox = NULL;
     this->twin = NULL;
-    this->ant = NULL;
     this->f = NULL;
     this->origem = NULL;
 }
@@ -33,11 +32,6 @@ void HalfEdge::setProx(HalfEdge *prox)
     this->prox = prox;
 }
 
-void HalfEdge::setAnt(HalfEdge *ant)
-{
-    this->ant = ant;
-}
-
 Vertex* HalfEdge::getOrigem(void)
 {
     return this->origem;
@@ -55,7 +49,11 @@ Face* HalfEdge::getFace(void)
 
 HalfEdge* HalfEdge::getAnt(void)
 {
-    return this->ant;
+    HalfEdge *he = getProx();
+
+    while (he->getProx() != this) he = he->getProx();
+
+    return he;
 }
 
 HalfEdge* HalfEdge::getProx(void)
@@ -70,8 +68,11 @@ HalfEdge* HalfEdge::getTwin(void)
 
 bool HalfEdge::operator==(HalfEdge& e)
 {
-    if(this->origem == e.getOrigem() && this->ant == e.ant && this->prox == e.prox &&
-       this->twin == e.getTwin() && this->f == e.getFace())
+    if(this->getOrigem() == e.getOrigem() &&
+       this->getAnt()    == e.getAnt()    &&
+       this->getProx()   == e.getProx()   &&
+       this->getTwin()   == e.getTwin()   &&
+       this->getFace()   == e.getFace())
         return true;
 
 

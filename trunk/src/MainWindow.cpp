@@ -2,95 +2,58 @@
 #include <QPainter>
 #include <Qt>
 #include <CommandQueue.h>
+#include "ui_mainwindow.h"
 
-MainWindow::MainWindow()
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    QIcon zi(":zoom-in");
-    QIcon zo(":zoom-out");
-    QIcon op(":open");
-    QIcon al(":arrow-left");
-    QIcon au(":arrow-up");
-    QIcon ar(":arrow-rigth");
-    QIcon ad(":arrow-down");
-    QIcon a(":aresta");
-    QIcon v(":vertice");
-    QIcon f(":face");
+    ui->setupUi(this);
 
     fila = new CommandQueue();
     centralpanel = new RenderPanel(fila);
     setCentralWidget(centralpanel);
 
-    tb = new QToolBar("Tool Bar", this);
-    fd = new QFileDialog(this, Qt::Window);
-    fd->setDirectory("../../halfedge/resources");
-    fd->setFilter("*.ply");
-    
-    
-    connect(tb, SIGNAL(actionTriggered( QAction * )), this, SLOT(clicou(QAction*)));
-    connect(fd, SIGNAL(fileSelected(const QString &)), centralpanel, SLOT(recebeArquivo(const QString &)));
-    
-    
-    open = tb->addAction(op,"");
-    tb->addSeparator();
-    zoomIn = tb->addAction(zi, "");
-    zoomOut = tb->addAction(zo, "");
-    tb->addSeparator();
-    panU = tb->addAction(au, "");
-    panL = tb->addAction(al, "");
-    panR = tb->addAction(ar, "");
-    panD = tb->addAction(ad, "");
-    tb->addSeparator();
-    vertice = tb->addAction(v,"");
-    aresta = tb->addAction(a,"");
-    face = tb->addAction(f, "");
-    del = tb->addAction("deleta");
-    vdv = tb->addAction("VDV");
-
-    addToolBar(Qt::LeftToolBarArea, tb);
+    connect(ui->toolBar, SIGNAL(actionTriggered( QAction * )), this, SLOT(clicou(QAction*)));
 
     connect(centralpanel, SIGNAL(atualizaMain()), this, SLOT(update()));
 
-    setWindowTitle("trab2FT 0.0.1");
     setFixedSize(800, 600);
 }
 
 void MainWindow::clicou(QAction* a)
 {
-    if(a == open)
-        fd->open();
-    else if(a == zoomIn)
+    if(a == ui->actionOpen_File)
+    {
+        QString fn = QFileDialog::getOpenFileName(this, "Abrir Malha", "../..", "*.ply" );
+        if(!fn.isEmpty())
+            centralpanel->recebeArquivo(fn);
+    }
+    else if(a == ui->actionZoom_In)
     {
         fila->produz(INCZOOM);
-    }else if (a == zoomOut)
+    }else if (a == ui->actionZoom_Out)
     {
         fila->produz(DECZOOM);
-    }else if (a == panU)
+    }else if (a == ui->actionUp)
     {
         fila->produz(DECY);
-    }else if (a == panL)
+    }else if (a == ui->actionLeft)
     {
         fila->produz(DECX);
-    }else if (a == panD)
+    }else if (a == ui->actionDown)
     {
         fila->produz(INCY);
-    }else if(a == panR)
+    }else if(a == ui->actionRight)
     {
         fila->produz(INCX);
-    }else if(a == vertice)
+    }else if(a == ui->actionVertice)
     {
         fila->produz(PONTOS);
-    }else if(a == aresta)
+    }else if(a == ui->actionAresta)
     {
         fila->produz(ARESTAS);
-    }else if(a == face)
+    }else if(a == ui->actionFace)
     {
         fila->produz(FACES);
-    }else if(a ==del)
-    {
-        fila->produz(DELETA);
-    }else if(a == vdv)
-    {
-        fila->produz(VDV);
     }
 }
 
