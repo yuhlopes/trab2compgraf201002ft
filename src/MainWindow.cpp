@@ -54,6 +54,9 @@ void MainWindow::clicou(QAction* a)
     }else if(a == ui->actionFace)
     {
         fila->produz(FACES);
+    }else if(a == ui->actionConvex_Hull)
+    {
+        fila->produz(CONVHULL);
     }
 }
 

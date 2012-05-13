@@ -9,12 +9,12 @@ Face::~Face()
 {
 }
 
-void Face::setOuterComp(HalfEdge *e)
+void Face::setHalfEdge(HalfEdge *e)
 {
-    this->outerComp = e;
+    this->hEdge = e;
 }
 
-HalfEdge* Face::getOuterComp(void)
+HalfEdge* Face::getHalfEdge(void)
 {
-    return this->outerComp;
+    return this->hEdge;
 }

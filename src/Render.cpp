@@ -99,6 +99,9 @@ void Render::run(void) {
                 sel->setY(ex.y);
                 click();
                 break;
+            case CONVHULL:
+                convexHull();
+                break;
         }
         atualizaScreen();
     } while (true);
@@ -412,7 +415,7 @@ void Render::renderizaFaces()
     if(hsel != NULL)
         partida = hsel;
     if(fsel != NULL)
-        partida = fsel->getOuterComp();
+        partida = fsel->getHalfEdge();
 
     if(vsel != NULL)
     {
@@ -473,7 +476,7 @@ void Render::renderizaFaces()
             delete v;
         QSet<Face*>::iterator jt;
         for(jt = f.begin(); jt != f.end(); ++jt)
-            renderizaFace((*jt)->getOuterComp(), frontBuffer,vizinhoScreen);
+            renderizaFace((*jt)->getHalfEdge(), frontBuffer,vizinhoScreen);
     }
 
 
@@ -495,7 +498,7 @@ void Render::renderizaArestas()
     if(hsel != NULL)
         partida = hsel;
     if(fsel != NULL)
-        partida = fsel->getOuterComp();
+        partida = fsel->getHalfEdge();
 
     if(vsel != NULL || hsel != NULL)
     {
@@ -552,7 +555,7 @@ void Render::renderizaVertices()
     if(hsel != NULL)
         partida = hsel;
     if(fsel != NULL)
-        partida = fsel->getOuterComp();
+        partida = fsel->getHalfEdge();
 
     if(vsel != NULL || hsel != NULL)
     {
@@ -678,7 +681,7 @@ void Render::faceSelecionada()
     if(interface.isExterna(fsel))
         renderizaFaceExterna(&selecionadoScreen);
     else
-        renderizaFace(fsel->getOuterComp(), frontBuffer,selecionadoScreen);
+        renderizaFace(fsel->getHalfEdge(), frontBuffer,selecionadoScreen);
 }
 
 void Render::renderizaFaceExterna(QPen *pen)
@@ -791,3 +794,9 @@ uint qHash(const QPointF& p)
     return (uint)qRound(p.x()*p.y());
 }
 
+void Render::convexHull()
+{
+    interface.convexHull();
+    renderiza();
+    renderizaFront();
+}

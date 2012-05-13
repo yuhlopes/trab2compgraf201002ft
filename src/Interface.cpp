@@ -64,7 +64,7 @@ void Interface::addFace(QVector<QPointF> in)
 
     ant->setProx(first);
 
-    f->setOuterComp(first);
+    f->setHalfEdge(first);
 
     faces.push_back(f);
 }
@@ -115,7 +115,7 @@ void Interface::adicionaface(HalfEdge* e, Face* f)
     nova->setTwin(ori);
     ori->setTwin(nova);
     nova->setOrigem(ori->getDestino());
-    f->setOuterComp(nova);
+    f->setHalfEdge(nova);
     ant = nova;
     first = nova;
 
@@ -384,4 +384,12 @@ void Interface::removeEdgeFromCollection(HalfEdge* e)
             break;
         }
     }
+}
+
+void Interface::convexHull()
+{
+    HalfEdge* ant;
+    HalfEdge* atu;
+
+    ant = faceExterna->getHalfEdge();
 }
