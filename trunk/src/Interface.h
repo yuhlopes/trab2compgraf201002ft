@@ -41,6 +41,8 @@ QVector<Face*>& getFaces();
 void removeFaceFromCollection(Face*);
 void removeEdgeFromCollection(HalfEdge*);
 
+void convexHull();
+
 
 private:
     KDTree *kdt;

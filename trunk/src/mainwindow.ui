@@ -48,6 +48,8 @@
    <addaction name="actionVertice"/>
    <addaction name="actionAresta"/>
    <addaction name="actionFace"/>
+   <addaction name="separator"/>
+   <addaction name="actionConvex_Hull"/>
   </widget>
   <action name="actionOpen_File">
    <property name="icon">
@@ -158,6 +160,18 @@
    </property>
    <property name="text">
     <string>Face</string>
+   </property>
+  </action>
+  <action name="actionConvex_Hull">
+   <property name="icon">
+    <iconset resource="../trab2FT.qrc">
+     <normaloff>:/convexhull</normaloff>:/convexhull</iconset>
+   </property>
+   <property name="text">
+    <string>Convex Hull</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
    </property>
   </action>
  </widget>

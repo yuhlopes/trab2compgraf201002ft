@@ -12,11 +12,11 @@ public:
     Face();
     virtual ~Face();
 
-void setOuterComp(HalfEdge *e);
-HalfEdge* getOuterComp(void);
+void setHalfEdge(HalfEdge *e);
+HalfEdge* getHalfEdge(void);
 
 private:
-    HalfEdge *outerComp;
+    HalfEdge *hEdge;
 };
 
 
