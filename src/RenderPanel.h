@@ -10,7 +10,6 @@ class RenderPanel : public QWidget
 
 private slots:
     void update(const QImage &);
-    void recebeArquivo(const QString &);
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event);
@@ -22,6 +21,7 @@ signals:
 
 public:
     RenderPanel(CommandQueue *c);
+    void recebeArquivo(const QString &);
 
 private:
 

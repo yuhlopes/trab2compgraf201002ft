@@ -19,7 +19,6 @@ void setOrigem(QPoint *p);
 void setFace(Face *f);
 void setTwin(HalfEdge *twin);
 void setProx(HalfEdge *prox);
-void setAnt(HalfEdge *ant);
 Vertex*   getOrigem(void);
 Vertex*   getDestino(void);
 Face*     getFace(void);
@@ -65,7 +64,7 @@ bool operator!=(HalfEdge& );
 private:
     Vertex *origem;
     Face *f;
-    HalfEdge *twin, *prox, *ant;
+    HalfEdge *twin, *prox;
 
 };
 

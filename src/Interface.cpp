@@ -48,8 +48,6 @@ void Interface::addFace(QVector<QPointF> in)
         e->setOrigem(v);
 
         e->setFace(f);
-
-        e->setAnt(ant);
         if (ant!= NULL)
         {
             ant->setProx(e);
@@ -64,7 +62,6 @@ void Interface::addFace(QVector<QPointF> in)
         ant = e;
     }
 
-    first->setAnt(ant);
     ant->setProx(first);
 
     f->setOuterComp(first);
@@ -144,7 +141,6 @@ void Interface::adicionaface(HalfEdge* e, Face* f)
         nova->setTwin(ori);
         ori->setTwin(nova);
         nova->setProx(ant);
-        ant->setAnt(nova);
         nova->setOrigem(ori->getDestino());
 
         ori = ori->getProx();
@@ -153,7 +149,6 @@ void Interface::adicionaface(HalfEdge* e, Face* f)
     }
 
     ori->getTwin()->setProx(ant);
-    ant->setAnt(ori->getTwin());
 }
 
 void Interface::addExtEdges(void)

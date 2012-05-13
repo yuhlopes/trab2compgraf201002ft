@@ -4,6 +4,10 @@
 #include <QtGui>
 #include <RenderPanel.h>
 
+namespace Ui {
+    class MainWindow;
+}
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -13,26 +17,13 @@ public slots:
     void clicou(QAction* a);
 
 public:
-    MainWindow();
+    MainWindow(QWidget* parent = 0);
     
 private:
    CommandQueue *fila;
    RenderPanel* centralpanel;
-   QFileDialog *fd;
-   QToolBar * tb;
-   QAction *open;
-   QAction *zoomIn;
-   QAction *zoomOut;
-   QAction *panR;
-   QAction *panL;
-   QAction *panU;
-   QAction *panD;
-   QAction *vertice;
-   QAction *aresta;
-   QAction *face;
-   QAction *del;
-   QAction *vdv;
 
+    Ui::MainWindow *ui;
 };
 
 

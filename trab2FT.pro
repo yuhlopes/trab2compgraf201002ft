@@ -83,3 +83,6 @@ SOURCES += src/CommandQueue.cpp
 
 # Arquivos dos resources (imagens por exemplo) do jogo
 RESOURCES += trab2FT.qrc
+
+FORMS += \
+    src/mainwindow.ui
