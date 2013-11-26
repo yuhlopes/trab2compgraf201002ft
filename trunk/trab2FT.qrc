@@ -11,5 +11,8 @@
         <file alias="aresta">imgs/aresta.png</file>
         <file alias="face">imgs/face.png</file>
         <file alias="convexhull">imgs/convexhull.png</file>
+	<file alias="bond">imgs/bondary.png</file>
+        <file alias="true">imgs/true.png</file>
+        <file alias="false">imgs/false.png</file>
     </qresource>
 </RCC>

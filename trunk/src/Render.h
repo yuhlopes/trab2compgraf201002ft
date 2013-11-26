@@ -20,6 +20,7 @@ class Render : public QThread
 
 signals:
         void renderizado(const QImage &screen);
+        void feedBackBondary(bool);
 
         
 public slots:
@@ -59,6 +60,7 @@ private:
         void renderizaComponente(HalfEdge *h,QImage* b,QPen pen);
         bool componenteFaceUnica(HalfEdge *h);
         void convexHull();
+        void externa();
 
         Vertex* vsel;
         HalfEdge* hsel;

@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -49,7 +49,7 @@
    <addaction name="actionAresta"/>
    <addaction name="actionFace"/>
    <addaction name="separator"/>
-   <addaction name="actionConvex_Hull"/>
+   <addaction name="actionBondary"/>
   </widget>
   <action name="actionOpen_File">
    <property name="icon">
@@ -172,6 +172,19 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionBondary">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normalon>:/bond</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>bondary</string>
    </property>
   </action>
  </widget>

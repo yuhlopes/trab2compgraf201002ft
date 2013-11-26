@@ -102,6 +102,9 @@ void Render::run(void) {
             case CONVHULL:
                 convexHull();
                 break;
+        case EXTERN:
+                externa();
+                break;
         }
         atualizaScreen();
     } while (true);
@@ -799,4 +802,19 @@ void Render::convexHull()
     interface.convexHull();
     renderiza();
     renderizaFront();
+}
+
+void Render::externa()
+{
+    bool ext = false;
+    if(vsel != NULL)
+        ext = interface.isBoundary(vsel);
+    else if(hsel != NULL)
+        ext = interface.isBoundary(hsel);
+    else if(fsel != NULL)
+        ext = interface.isBoundary(fsel);
+    else
+        return;
+
+    emit feedBackBondary(ext);
 }

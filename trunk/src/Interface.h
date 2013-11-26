@@ -43,6 +43,10 @@ void removeEdgeFromCollection(HalfEdge*);
 
 void convexHull();
 
+bool isBoundary(Vertex *);
+bool isBoundary(HalfEdge *);
+bool isBoundary(Face *);
+
 
 private:
     KDTree *kdt;

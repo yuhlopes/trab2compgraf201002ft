@@ -15,9 +15,13 @@ class MainWindow : public QMainWindow
 public slots:
     void update(void);
     void clicou(QAction* a);
+    void bondaryClick(bool value);
 
 public:
     MainWindow(QWidget* parent = 0);
+
+    void bondaryFeedBack(bool value);
+    void bondaryReset();
     
 private:
    CommandQueue *fila;
