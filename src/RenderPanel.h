@@ -2,7 +2,9 @@
 #define RENDERPANEL_H
 
 #include <QtGui>
-#include <Render.h>
+#include <CommandQueue.h>
+
+class MainWindow;
 
 class RenderPanel : public QWidget
 {
@@ -10,6 +12,7 @@ class RenderPanel : public QWidget
 
 private slots:
     void update(const QImage &);
+    void feedBackBondary(bool);
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event);
@@ -20,7 +23,7 @@ signals:
     void enviaArquivo(const QString &);
 
 public:
-    RenderPanel(CommandQueue *c);
+    RenderPanel(CommandQueue *c, MainWindow *mw);
     void recebeArquivo(const QString &);
 
 private:
@@ -29,6 +32,7 @@ private:
     int screenH;
     QLabel* fundolb;
     CommandQueue *cmdq;
+    MainWindow *m_mw;
     
 };
 

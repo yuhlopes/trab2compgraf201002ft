@@ -9,10 +9,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
 
     fila = new CommandQueue();
-    centralpanel = new RenderPanel(fila);
+    centralpanel = new RenderPanel(fila, this);
     setCentralWidget(centralpanel);
 
     connect(ui->toolBar, SIGNAL(actionTriggered( QAction * )), this, SLOT(clicou(QAction*)));
+
+    connect(ui->actionBondary, SIGNAL(toggled(bool)), this, SLOT(bondaryClick(bool)));
 
     connect(centralpanel, SIGNAL(atualizaMain()), this, SLOT(update()));
 
@@ -21,6 +23,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::clicou(QAction* a)
 {
+    if(a != ui->actionBondary)
+        bondaryReset();
+
     if(a == ui->actionOpen_File)
     {
         QString fn = QFileDialog::getOpenFileName(this, "Abrir Malha", "../..", "*.ply" );
@@ -63,4 +68,25 @@ void MainWindow::clicou(QAction* a)
 void MainWindow::update(void)
 {
 	repaint();
+}
+
+void MainWindow::bondaryClick(bool value)
+{
+    ui->actionBondary->setIcon(QIcon(":/bond"));
+    if(value)
+        fila->produz(EXTERN);
+}
+
+void MainWindow::bondaryFeedBack(bool value)
+{
+    if(value)
+        ui->actionBondary->setIcon(QIcon(":/true"));
+    else
+        ui->actionBondary->setIcon(QIcon(":/false"));
+}
+
+void MainWindow::bondaryReset()
+{
+    ui->actionBondary->setIcon(QIcon(":/bond"));
+    ui->actionBondary->setChecked(false);
 }

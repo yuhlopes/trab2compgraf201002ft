@@ -393,3 +393,47 @@ void Interface::convexHull()
 
     ant = faceExterna->getHalfEdge();
 }
+
+bool Interface::isBoundary(Vertex * v)
+{
+    return false;
+}
+
+bool Interface::isBoundary(HalfEdge * h)
+{
+    Face*face=h->getFace();
+    if (isExterna(face))
+        return true;
+
+    HalfEdge* twin = h->getTwin();
+    face = twin->getFace();
+    if (isExterna(face))
+        return true;
+
+    return false;
+}
+
+bool Interface::isBoundary(Face * f)
+{
+    HalfEdge*h=f->getHalfEdge();
+    HalfEdge*prox=f->getHalfEdge();
+
+    if (isBoundary(prox))
+      return  true;
+    prox=prox->getProx();
+
+    while(prox!=h)
+    {
+        if (isBoundary(prox))
+          return  true;
+        prox=prox->getProx();
+    }
+
+    return false;
+}
+
+
+
+
+
+
