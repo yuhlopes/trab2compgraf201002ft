@@ -396,6 +396,20 @@ void Interface::convexHull()
 
 bool Interface::isBoundary(Vertex * v)
 {
+    HalfEdge*h=v->getEdge();
+    HalfEdge*prox=h;
+
+    if (isBoundary(prox))
+      return  true;
+    prox=prox->getTwin()->getProx();
+
+    while(prox!=h)
+    {
+        if (isBoundary(prox))
+          return  true;
+        prox=prox->getTwin()->getProx();
+    }
+
     return false;
 }
 
